@@ -23,12 +23,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.axiel7.tachisync.R
 import com.axiel7.tachisync.ui.external.EXTERNAL_STORAGE_DESTINATION
 import com.axiel7.tachisync.ui.external.ExternalView
 import com.axiel7.tachisync.ui.files.FILES_DESTINATION
 import com.axiel7.tachisync.ui.files.FilesView
+import com.axiel7.tachisync.ui.files.FilesViewModel
 import com.axiel7.tachisync.ui.theme.TachisyncTheme
 import com.axiel7.tachisync.utils.SharedPrefsHelpers
 
@@ -54,22 +56,54 @@ class MainActivity : ComponentActivity() {
 fun MainView() {
     val context = LocalContext.current
     val navController = rememberNavController()
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
     val viewModel: MainViewModel = viewModel()
+    val filesViewModel: FilesViewModel = viewModel()
+    val showEditToolbar by remember {
+        derivedStateOf {
+            navBackStackEntry?.destination?.route == FILES_DESTINATION
+                    && filesViewModel.selectedCount > 0
+        }
+    }
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text(text = stringResource(R.string.app_name)) }
+            TopAppBar(
+                title = {
+                    if (showEditToolbar) {
+                        Text(text = "${filesViewModel.selectedCount} selected")
+                    } else {
+                        Text(text = stringResource(R.string.app_name))
+                    }
+                },
+                navigationIcon = {
+                    if (showEditToolbar) {
+                        IconButton(onClick = { filesViewModel.deselectAllManga() }) {
+                            Icon(painter = painterResource(R.drawable.close_24), contentDescription = "close")
+                        }
+                    }
+                },
+                actions = {
+                    if (showEditToolbar) {
+                        IconButton(onClick = { filesViewModel.selectAllManga() }) {
+                            Icon(painter = painterResource(R.drawable.select_all_24), contentDescription = "select all")
+                        }
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = if (showEditToolbar) MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp)
+                else MaterialTheme.colorScheme.background
+                )
             )
         },
         bottomBar = { BottomNavBar(navController = navController) },
         floatingActionButton = {
-            ExtendedFloatingActionButton(onClick = { viewModel.syncContents(context) }) {
-                Text(
-                    text = viewModel.selectedCount.toString(),
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold
-                )
+            ExtendedFloatingActionButton(
+                onClick = {
+                    viewModel.syncContents(context, filesViewModel.downloadedManga, filesViewModel.selectedManga)
+                }
+            ) {
+                Icon(painter = painterResource(R.drawable.sync_24), contentDescription = "sync")
                 Text(text = "Sync now", modifier = Modifier.padding(start = 8.dp))
             }
         }
@@ -79,7 +113,9 @@ fun MainView() {
             startDestination = FILES_DESTINATION,
             modifier = Modifier.padding(it)
         ) {
-            composable(FILES_DESTINATION) { FilesView(mainViewModel = viewModel) }
+            composable(FILES_DESTINATION) {
+                FilesView(filesViewModel = filesViewModel, mainViewModel = viewModel)
+            }
 
             composable(EXTERNAL_STORAGE_DESTINATION) { ExternalView(mainViewModel = viewModel) }
         }
@@ -102,6 +138,7 @@ fun MainView() {
             viewModel.tachiyomiUri = Uri.parse(it)
         }
     }
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
