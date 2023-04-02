@@ -11,7 +11,9 @@ import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.viewModelScope
 import com.axiel7.tachisync.data.model.Manga
 import com.axiel7.tachisync.ui.base.BaseViewModel
+import com.axiel7.tachisync.utils.FileUtils.areUriPermissionsGranted
 import com.axiel7.tachisync.utils.FileUtils.releaseUriPermissions
+import com.axiel7.tachisync.utils.SharedPrefsHelpers
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -19,27 +21,16 @@ class FilesViewModel: BaseViewModel() {
 
     var downloadedManga by mutableStateOf(emptyList<Manga>())
 
-    var tachiyomiDownloadsUri: Uri? = null
     var openIntentForDirectory by mutableStateOf(false)
 
-    fun getTachiyomiDirectory() {
-        isLoading = true
+    fun refresh(context: Context) {
         viewModelScope.launch(Dispatchers.IO) {
-            //TODO: check tachiyomi forks dirs
-            val tachiyomiDirs = Environment.getExternalStorageDirectory()
-                .listFiles { _, name -> name == "Tachiyomi" }
-
-            if (tachiyomiDirs?.isNotEmpty() == true) {
-                val downloadsDir = tachiyomiDirs[0].listFiles { _, name -> name == "downloads" }
-
-                if (downloadsDir?.isNotEmpty() == true) {
-                    tachiyomiDownloadsUri = downloadsDir[0].toUri()
-                    openIntentForDirectory = true
-
-                } else setErrorMessage("Download some content first on Tachiyomi")
-            } else setErrorMessage("Tachiyomi directory not found")
-
-            isLoading = false
+            val tachiyomiUri = SharedPrefsHelpers.instance?.getString("tachiyomi_uri", null)
+            if (tachiyomiUri.isNullOrEmpty() || !context.areUriPermissionsGranted(tachiyomiUri)) {
+                openTachiyomiDirectoryHelpDialog = true
+            } else {
+                readDownloadsDir(Uri.parse(tachiyomiUri), context)
+            }
         }
     }
 
@@ -50,6 +41,7 @@ class FilesViewModel: BaseViewModel() {
             val sourcesDir = DocumentFile.fromTreeUri(context, downloadsUri)
             if (sourcesDir == null || !sourcesDir.exists()) {
                 context.releaseUriPermissions(downloadsUri)
+                SharedPrefsHelpers.instance?.deleteValue("tachiyomi_uri")
             } else {
                 sourcesDir.listFiles().forEach { sourceFile ->
                     sourceFile.listFiles().forEach { series ->
@@ -64,4 +56,6 @@ class FilesViewModel: BaseViewModel() {
             isLoading = false
         }
     }
+
+    var openTachiyomiDirectoryHelpDialog by mutableStateOf(false)
 }

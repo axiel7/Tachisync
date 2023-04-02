@@ -1,19 +1,17 @@
 package com.axiel7.tachisync.ui.main
 
-import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.os.Environment
-import android.provider.Settings
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -26,27 +24,20 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.axiel7.tachisync.BuildConfig
 import com.axiel7.tachisync.R
 import com.axiel7.tachisync.ui.external.EXTERNAL_STORAGE_DESTINATION
 import com.axiel7.tachisync.ui.external.ExternalView
 import com.axiel7.tachisync.ui.files.FILES_DESTINATION
 import com.axiel7.tachisync.ui.files.FilesView
 import com.axiel7.tachisync.ui.theme.TachisyncTheme
+import com.axiel7.tachisync.utils.SharedPrefsHelpers
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            if (!Environment.isExternalStorageManager()) {
-                val uri = Uri.parse("package:${BuildConfig.APPLICATION_ID}")
-                startActivity(Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, uri))
-            }
-        }*/
         setContent {
             TachisyncTheme {
-                // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -61,6 +52,7 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainView() {
+    val context = LocalContext.current
     val navController = rememberNavController()
     val viewModel: MainViewModel = viewModel()
 
@@ -72,13 +64,12 @@ fun MainView() {
         },
         bottomBar = { BottomNavBar(navController = navController) },
         floatingActionButton = {
-            ExtendedFloatingActionButton(onClick = { /*TODO*/ }) {
+            ExtendedFloatingActionButton(onClick = { viewModel.syncContents(context) }) {
                 Text(
                     text = viewModel.selectedCount.toString(),
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 )
-                //Icon(painter = painterResource(R.drawable.sync_24), contentDescription = "sync")
                 Text(text = "Sync now", modifier = Modifier.padding(start = 8.dp))
             }
         }
@@ -91,6 +82,40 @@ fun MainView() {
             composable(FILES_DESTINATION) { FilesView(mainViewModel = viewModel) }
 
             composable(EXTERNAL_STORAGE_DESTINATION) { ExternalView(mainViewModel = viewModel) }
+        }
+    }
+
+    if (viewModel.showMessage) {
+        Toast.makeText(context, viewModel.message, Toast.LENGTH_SHORT).show()
+        viewModel.showMessage = false
+    }
+
+    if (viewModel.isSyncing) {
+        SyncingDialog(viewModel = viewModel)
+    }
+
+    LaunchedEffect(context) {
+        SharedPrefsHelpers.instance?.getString("external_uri", null)?.let {
+            viewModel.externalSyncUri = Uri.parse(it)
+        }
+        SharedPrefsHelpers.instance?.getString("tachiyomi_uri", null)?.let {
+            viewModel.tachiyomiUri = Uri.parse(it)
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SyncingDialog(viewModel: MainViewModel) {
+    AlertDialog(
+        onDismissRequest = { },
+    ) {
+        Column {
+            Text(text = "Syncing...", modifier = Modifier.padding(16.dp))
+            LinearProgressIndicator(
+                progress = viewModel.progress,
+                modifier = Modifier.padding(8.dp)
+            )
         }
     }
 }

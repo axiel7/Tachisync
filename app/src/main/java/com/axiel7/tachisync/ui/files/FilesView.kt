@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -41,12 +42,13 @@ const val FILES_DESTINATION = "files"
 fun FilesView(mainViewModel: MainViewModel) {
     val context = LocalContext.current
     val viewModel: FilesViewModel = viewModel()
-    val pullRefreshState = rememberPullRefreshState(viewModel.isLoading, { viewModel.getTachiyomiDirectory() })
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+    val pullRefreshState = rememberPullRefreshState(viewModel.isLoading, { viewModel.refresh(context) })
+    val uriLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         it.data?.data?.let { uri ->
             context.contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION or
                     Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
             SharedPrefsHelpers.instance?.saveString("tachiyomi_uri", uri.toString())
+            mainViewModel.tachiyomiUri = uri
             viewModel.readDownloadsDir(uri, context)
         }
     }
@@ -71,12 +73,13 @@ fun FilesView(mainViewModel: MainViewModel) {
 
     if (viewModel.openIntentForDirectory) {
         Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                putExtra(DocumentsContract.EXTRA_INITIAL_URI, viewModel.tachiyomiDownloadsUri)
-            }
-            launcher.launch(this)
+            uriLauncher.launch(this)
         }
         viewModel.openIntentForDirectory = false
+    }
+
+    if (viewModel.openTachiyomiDirectoryHelpDialog) {
+        TachiyomiDirectoryHelpDialog(viewModel = viewModel)
     }
 
     if (viewModel.showMessage) {
@@ -85,12 +88,7 @@ fun FilesView(mainViewModel: MainViewModel) {
     }
 
     LaunchedEffect(context) {
-        val tachiyomiUri = SharedPrefsHelpers.instance?.getString("tachiyomi_uri", null)
-        if (tachiyomiUri.isNullOrEmpty() || !context.areUriPermissionsGranted(tachiyomiUri)) {
-            viewModel.getTachiyomiDirectory()
-        } else {
-            viewModel.readDownloadsDir(Uri.parse(tachiyomiUri), context)
-        }
+        viewModel.refresh(context)
     }
 }
 
@@ -121,10 +119,34 @@ fun SelectableMangaItemView(
                     onClick(it)
                 }
             )
-            Text(text = manga.name, modifier = Modifier.padding(8.dp))
+            Text(
+                text = manga.name,
+                modifier = Modifier.padding(8.dp),
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1
+            )
         }
         Text(text = manga.chapters.toString(), color = MaterialTheme.colorScheme.onPrimaryContainer)
     }
+}
+
+@Composable
+fun TachiyomiDirectoryHelpDialog(viewModel: FilesViewModel) {
+    AlertDialog(
+        onDismissRequest = { viewModel.openTachiyomiDirectoryHelpDialog = false },
+        title = { Text(text = "Downloads directory") },
+        text = { Text(text = "On the next screen, please navigate to the folder containing your Tachiyomi downloads (usually /Tachiyomi/downloads/) and select 'Use this folder'") },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    viewModel.openTachiyomiDirectoryHelpDialog = false
+                    viewModel.openIntentForDirectory = true
+                }
+            ) {
+                Text(text = "OK")
+            }
+        }
+    )
 }
 
 @Preview(showBackground = true)
