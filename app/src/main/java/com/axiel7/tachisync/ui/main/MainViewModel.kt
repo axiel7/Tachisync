@@ -23,7 +23,6 @@ class MainViewModel: BaseViewModel() {
 
     fun syncContents(context: Context, contents: List<Manga>, selected: List<Int>) {
         isSyncing = true
-        progress = 1f
         viewModelScope.launch(Dispatchers.IO) {
             if (selected.isEmpty()) setErrorMessage("No content selected")
             else if (externalSyncUri == null) setErrorMessage("No external directory selected")
@@ -34,11 +33,11 @@ class MainViewModel: BaseViewModel() {
                         setErrorMessage("Invalid external directory")
                     } else {
                         val selectedContent = contents.filterIndexed { index, _ -> selected.contains(index) }
-                        val selectedCount = selectedContent.size
+                        val selectedCount = selectedContent.size.toFloat()
                         val files = selectedContent.map { it.file }
                         files.forEachIndexed { index, file ->
                             context.syncDirectory(sourceDir = file, destRootDir = destDir!!)
-                            progress = (index / selectedCount).toFloat()
+                            progress = (index + 1).div(selectedCount)
                         }
                     }
                 } catch (e: Exception) {
