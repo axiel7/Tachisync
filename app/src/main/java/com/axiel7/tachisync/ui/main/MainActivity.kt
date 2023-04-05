@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
@@ -14,10 +13,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -141,20 +138,19 @@ fun MainView() {
 
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SyncingDialog(viewModel: MainViewModel) {
     AlertDialog(
         onDismissRequest = { },
-    ) {
-        Column {
-            Text(text = "Syncing...", modifier = Modifier.padding(16.dp))
+        confirmButton = { },
+        title = { Text(text = "Syncing...", modifier = Modifier.padding(16.dp)) },
+        text = {
             LinearProgressIndicator(
                 progress = viewModel.progress,
                 modifier = Modifier.padding(8.dp)
             )
         }
-    }
+    )
 }
 
 @Composable
