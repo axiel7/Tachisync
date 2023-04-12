@@ -3,7 +3,7 @@
     <string name="num_selected">%s selected</string>
     <string name="close">Close</string>
     <string name="select_all">Select All</string>
-    <string name="sync">Sync</string>
+    <string name="sync">Sync now</string>
     <string name="syncing">Syncing…</string>
     <string name="downloads">Downloads</string>
     <string name="external">External</string>
@@ -17,4 +17,8 @@
     <string name="device">Device</string>
     <string name="external_directory">External directory</string>
     <string name="external_directory_explanation">On the next screen, please navigate to the folder you want to sync your downloaded content and select \'Use this folder\'</string>
+    <string name="about">About</string>
+    <string name="back">Back</string>
+    <string name="developer">Developer</string>
+    <string name="version">Version</string>
 </resources>

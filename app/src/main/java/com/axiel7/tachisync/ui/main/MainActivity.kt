@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.*
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
@@ -23,6 +24,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.axiel7.tachisync.R
+import com.axiel7.tachisync.ui.about.ABOUT_DESTINATION
+import com.axiel7.tachisync.ui.about.AboutView
 import com.axiel7.tachisync.ui.external.EXTERNAL_STORAGE_DESTINATION
 import com.axiel7.tachisync.ui.external.ExternalView
 import com.axiel7.tachisync.ui.files.FILES_DESTINATION
@@ -48,7 +51,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
 fun MainView() {
     val context = LocalContext.current
@@ -56,6 +59,11 @@ fun MainView() {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val viewModel: MainViewModel = viewModel()
     val filesViewModel: FilesViewModel = viewModel()
+    val isFullScreenDestination by remember {
+        derivedStateOf {
+            navBackStackEntry?.destination?.route == ABOUT_DESTINATION
+        }
+    }
     val showEditToolbar by remember {
         derivedStateOf {
             navBackStackEntry?.destination?.route == FILES_DESTINATION
@@ -63,47 +71,86 @@ fun MainView() {
         }
     }
 
-    Scaffold(
+    com.google.accompanist.insets.ui.Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    if (showEditToolbar) {
-                        Text(text = stringResource(R.string.num_selected, filesViewModel.selectedCount.toString()))
-                    } else {
-                        Text(text = stringResource(R.string.app_name))
-                    }
-                },
-                navigationIcon = {
-                    if (showEditToolbar) {
-                        IconButton(onClick = { filesViewModel.deselectAllManga() }) {
-                            Icon(painter = painterResource(R.drawable.close_24), contentDescription = stringResource(R.string.close))
-                        }
-                    }
-                },
-                actions = {
-                    if (showEditToolbar) {
-                        IconButton(onClick = { filesViewModel.selectAllManga() }) {
-                            Icon(painter = painterResource(R.drawable.select_all_24), contentDescription = stringResource(R.string.select_all))
-                        }
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = if (showEditToolbar) MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp)
-                else MaterialTheme.colorScheme.background
-                )
-            )
-        },
-        bottomBar = { BottomNavBar(navController = navController) },
-        floatingActionButton = {
-            ExtendedFloatingActionButton(
-                onClick = {
-                    viewModel.syncContents(context, filesViewModel.downloadedManga, filesViewModel.selectedManga)
-                }
+            AnimatedVisibility(
+                visible = !isFullScreenDestination,
+                enter = slideInVertically(),
+                exit = slideOutVertically()
             ) {
-                Icon(painter = painterResource(R.drawable.sync_24), contentDescription = stringResource(R.string.sync))
-                Text(text = stringResource(R.string.sync), modifier = Modifier.padding(start = 8.dp))
+                TopAppBar(
+                    title = {
+                        if (showEditToolbar) {
+                            Text(
+                                text = stringResource(
+                                    R.string.num_selected,
+                                    filesViewModel.selectedCount.toString()
+                                )
+                            )
+                        } else {
+                            Text(text = stringResource(R.string.app_name))
+                        }
+                    },
+                    navigationIcon = {
+                        if (showEditToolbar) {
+                            IconButton(onClick = { filesViewModel.deselectAllManga() }) {
+                                Icon(
+                                    painter = painterResource(R.drawable.close_24),
+                                    contentDescription = stringResource(R.string.close)
+                                )
+                            }
+                        }
+                    },
+                    actions = {
+                        if (showEditToolbar) {
+                            IconButton(onClick = { filesViewModel.selectAllManga() }) {
+                                Icon(
+                                    painter = painterResource(R.drawable.select_all_24),
+                                    contentDescription = stringResource(R.string.select_all)
+                                )
+                            }
+                        } else {
+                            IconButton(onClick = { navController.navigate(ABOUT_DESTINATION) }) {
+                                Icon(
+                                    painter = painterResource(R.drawable.help_outline_24),
+                                    contentDescription = stringResource(R.string.about)
+                                )
+                            }
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = if (showEditToolbar) MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp)
+                        else MaterialTheme.colorScheme.background
+                    )
+                )
             }
-        }
+        },
+        bottomBar = {
+            AnimatedVisibility(
+                visible = !isFullScreenDestination,
+                enter = slideInVertically { it / 2 },
+                exit = slideOutVertically { it / 2 }
+            ) {
+                BottomNavBar(navController = navController)
+            }
+        },
+        floatingActionButton = {
+            AnimatedVisibility(
+                visible = !isFullScreenDestination,
+                enter = scaleIn(),
+                exit = scaleOut()
+            ) {
+                ExtendedFloatingActionButton(
+                    onClick = {
+                        viewModel.syncContents(context, filesViewModel.downloadedManga, filesViewModel.selectedManga)
+                    }
+                ) {
+                    Icon(painter = painterResource(R.drawable.sync_24), contentDescription = stringResource(R.string.sync))
+                    Text(text = stringResource(R.string.sync), modifier = Modifier.padding(start = 8.dp))
+                }
+            }
+        },
+        backgroundColor = MaterialTheme.colorScheme.background
     ) {
         NavHost(
             navController = navController,
@@ -115,6 +162,8 @@ fun MainView() {
             }
 
             composable(EXTERNAL_STORAGE_DESTINATION) { ExternalView(mainViewModel = viewModel) }
+
+            composable(ABOUT_DESTINATION) { AboutView(navController = navController) }
         }
     }
 
