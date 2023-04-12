@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -49,7 +50,7 @@ fun ExternalView(mainViewModel: MainViewModel) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Contents will be synced on: ${mainViewModel.externalSyncUri?.lastPathSegment}",
+                text = stringResource(R.string.contents_synced_on, mainViewModel.externalSyncUri?.lastPathSegment ?: ""),
                 modifier = Modifier.padding(horizontal = 16.dp),
                 textAlign = TextAlign.Center
             )
@@ -62,7 +63,7 @@ fun ExternalView(mainViewModel: MainViewModel) {
                 },
                 modifier = Modifier.padding(16.dp)
             ) {
-                Text(text = "Select another directory")
+                Text(text = stringResource(R.string.select_another_directory))
             }
         }
     } else if (viewModel.externalStorages.isEmpty()) {
@@ -72,19 +73,19 @@ fun ExternalView(mainViewModel: MainViewModel) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "No external devices found",
+                text = stringResource(R.string.no_external_found),
                 modifier = Modifier.padding(16.dp)
             )
 
             TextButton(onClick = { viewModel.getExternalStorages(context) }) {
-                Icon(painter = painterResource(R.drawable.refresh_24), contentDescription = "refresh")
-                Text(text = "Refresh", modifier = Modifier.padding(start = 4.dp))
+                Icon(painter = painterResource(R.drawable.refresh_24), contentDescription = stringResource(R.string.refresh))
+                Text(text = stringResource(R.string.refresh), modifier = Modifier.padding(start = 4.dp))
             }
         }//:Column
     } else {
         Column {
             Text(
-                text = "Select the device you want to sync on",
+                text = stringResource(R.string.select_device_to_sync),
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
             )
             LazyColumn {
@@ -136,7 +137,7 @@ fun ExternalDeviceItemView(
             .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(painter = painterResource(R.drawable.usb_24), contentDescription = "device")
+        Icon(painter = painterResource(R.drawable.usb_24), contentDescription = stringResource(R.string.device))
         Text(
             text = deviceName,
             modifier = Modifier.padding(start = 8.dp),
@@ -150,14 +151,14 @@ fun ExternalDeviceItemView(
 fun ExternalDirectoryHelpDialog(viewModel: ExternalViewModel) {
     AlertDialog(
         onDismissRequest = { viewModel.openExternalDirectoryHelpDialog = false },
-        title = { Text(text = "External directory") },
-        text = { Text(text = "On the next screen, please navigate to the folder you want to sync your downloaded content and select 'Use this folder'") },
+        title = { Text(text = stringResource(R.string.external_directory)) },
+        text = { Text(text = stringResource(R.string.external_directory_explanation)) },
         confirmButton = {
             TextButton(onClick = {
                 viewModel.openExternalDirectoryHelpDialog = false
                 viewModel.openIntentForDirectory = true
             }) {
-                Text(text = "OK")
+                Text(text = stringResource(android.R.string.ok))
             }
         }
     )

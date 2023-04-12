@@ -68,7 +68,7 @@ fun MainView() {
             TopAppBar(
                 title = {
                     if (showEditToolbar) {
-                        Text(text = "${filesViewModel.selectedCount} selected")
+                        Text(text = stringResource(R.string.num_selected, filesViewModel.selectedCount.toString()))
                     } else {
                         Text(text = stringResource(R.string.app_name))
                     }
@@ -76,14 +76,14 @@ fun MainView() {
                 navigationIcon = {
                     if (showEditToolbar) {
                         IconButton(onClick = { filesViewModel.deselectAllManga() }) {
-                            Icon(painter = painterResource(R.drawable.close_24), contentDescription = "close")
+                            Icon(painter = painterResource(R.drawable.close_24), contentDescription = stringResource(R.string.close))
                         }
                     }
                 },
                 actions = {
                     if (showEditToolbar) {
                         IconButton(onClick = { filesViewModel.selectAllManga() }) {
-                            Icon(painter = painterResource(R.drawable.select_all_24), contentDescription = "select all")
+                            Icon(painter = painterResource(R.drawable.select_all_24), contentDescription = stringResource(R.string.select_all))
                         }
                     }
                 },
@@ -100,8 +100,8 @@ fun MainView() {
                     viewModel.syncContents(context, filesViewModel.downloadedManga, filesViewModel.selectedManga)
                 }
             ) {
-                Icon(painter = painterResource(R.drawable.sync_24), contentDescription = "sync")
-                Text(text = "Sync now", modifier = Modifier.padding(start = 8.dp))
+                Icon(painter = painterResource(R.drawable.sync_24), contentDescription = stringResource(R.string.sync))
+                Text(text = stringResource(R.string.sync), modifier = Modifier.padding(start = 8.dp))
             }
         }
     ) {
@@ -143,7 +143,7 @@ fun SyncingDialog(viewModel: MainViewModel) {
     AlertDialog(
         onDismissRequest = { },
         confirmButton = { },
-        title = { Text(text = "Syncing...", modifier = Modifier.padding(16.dp)) },
+        title = { Text(text = stringResource(R.string.syncing), modifier = Modifier.padding(16.dp)) },
         text = {
             LinearProgressIndicator(
                 progress = viewModel.progress,
@@ -164,8 +164,8 @@ fun BottomNavBar(navController: NavController) {
                 selectedItem = 0
                 navController.navigate(FILES_DESTINATION)
             },
-            icon = { Icon(painter = painterResource(R.drawable.download_24), contentDescription = "download") },
-            label = { Text(text = "Downloads") }
+            icon = { Icon(painter = painterResource(R.drawable.download_24), contentDescription = stringResource(R.string.downloads)) },
+            label = { Text(text = stringResource(R.string.downloads)) }
         )
 
         NavigationBarItem(
@@ -174,8 +174,8 @@ fun BottomNavBar(navController: NavController) {
                 selectedItem = 1
                 navController.navigate(EXTERNAL_STORAGE_DESTINATION)
             },
-            icon = { Icon(painter = painterResource(R.drawable.storage_24), contentDescription = "storage") },
-            label = { Text(text = "External") }
+            icon = { Icon(painter = painterResource(R.drawable.storage_24), contentDescription = stringResource(R.string.external)) },
+            label = { Text(text = stringResource(R.string.external)) }
         )
     }
 }

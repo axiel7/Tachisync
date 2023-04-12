@@ -18,10 +18,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.axiel7.tachisync.R
 import com.axiel7.tachisync.data.model.Manga
 import com.axiel7.tachisync.ui.main.MainViewModel
 import com.axiel7.tachisync.ui.theme.TachisyncTheme
@@ -125,8 +127,8 @@ fun SelectableMangaItemView(
 fun TachiyomiDirectoryHelpDialog(viewModel: FilesViewModel) {
     AlertDialog(
         onDismissRequest = { viewModel.openTachiyomiDirectoryHelpDialog = false },
-        title = { Text(text = "Downloads directory") },
-        text = { Text(text = "On the next screen, please navigate to the folder containing your Tachiyomi downloads (usually /Tachiyomi/downloads/) and select 'Use this folder'") },
+        title = { Text(text = stringResource(R.string.download_directory)) },
+        text = { Text(text = stringResource(R.string.downloads_directory_explanation)) },
         confirmButton = {
             TextButton(
                 onClick = {
@@ -134,7 +136,7 @@ fun TachiyomiDirectoryHelpDialog(viewModel: FilesViewModel) {
                     viewModel.openIntentForDirectory = true
                 }
             ) {
-                Text(text = "OK")
+                Text(text = stringResource(android.R.string.ok))
             }
         }
     )
