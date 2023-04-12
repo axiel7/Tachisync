@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Tachisync</string>
+    <string name="app_name" translatable="false">Tachisync</string>
     <string name="num_selected">%s selected</string>
     <string name="close">Close</string>
     <string name="select_all">Select All</string>
@@ -8,7 +8,7 @@
     <string name="downloads">Downloads</string>
     <string name="external">External</string>
     <string name="download_directory">Downloads directory</string>
-    <string name="downloads_directory_explanation">On the next screen, please navigate to the folder containing your Tachiyomi downloads (usually /Tachiyomi/downloads/) and select \'Use this folder\'</string>
+    <string name="downloads_directory_explanation">On the next screen, navigate to the folder containing your Tachiyomi downloads (usually /Tachiyomi/downloads/) and select \'Use this folder\'</string>
     <string name="contents_synced_on">Contents will be synced on: %s</string>
     <string name="select_another_directory">Select another directory</string>
     <string name="no_external_found">No external devices found</string>
@@ -16,7 +16,7 @@
     <string name="select_device_to_sync">Select the device you want to sync on</string>
     <string name="device">Device</string>
     <string name="external_directory">External directory</string>
-    <string name="external_directory_explanation">On the next screen, please navigate to the folder you want to sync your downloaded content and select \'Use this folder\'</string>
+    <string name="external_directory_explanation">On the next screen, navigate to the folder you want to sync your downloaded content and select \'Use this folder\'</string>
     <string name="about">About</string>
     <string name="back">Back</string>
     <string name="developer">Developer</string>

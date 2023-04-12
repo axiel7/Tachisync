@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="num_selected">%s seleccionados</string>
+    <string name="close">Cerrar</string>
+    <string name="select_all">Seleccionar Todo</string>
+    <string name="sync">Sincronizar</string>
+    <string name="syncing">Sincronizando…</string>
+    <string name="downloads">Descargas</string>
+    <string name="external">Externo</string>
+    <string name="download_directory">Directorio de descargas</string>
+    <string name="downloads_directory_explanation">En la siguiente pantalla, dirígete a la carpeta contenedora de tus descargas de Tachiyomi (normalmente /Tachiyomi/downloads/) y pulsa \'Usar esta carpeta\'</string>
+    <string name="contents_synced_on">Los contenidos serán sincronizados en: %s</string>
+    <string name="select_another_directory">Seleccionar otro directorio</string>
+    <string name="no_external_found">No se han encontrado dispositivos externos</string>
+    <string name="refresh">Refrescar</string>
+    <string name="select_device_to_sync">Selecciona el dispositivo donde sincronizar</string>
+    <string name="device">Dispositivo</string>
+    <string name="external_directory">Directorio externo</string>
+    <string name="external_directory_explanation">En la siguiente pantalla, dirígete a la carpeta donde quieras sincronizar tu contenido descargado y pulsa \'Usar esta carpeta\'</string>
+    <string name="about">Acerca de</string>
+    <string name="back">Atrás</string>
+    <string name="developer">Desarrollador</string>
+    <string name="version">Versión</string>
+</resources>
