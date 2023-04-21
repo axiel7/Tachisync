@@ -42,6 +42,8 @@ class MainViewModel: BaseViewModel() {
                     }
                 } catch (e: Exception) {
                     setErrorMessage(e.message ?: "Error syncing")
+                    isSyncing = false
+                    return@launch
                 }
             }
             isSyncing = false
