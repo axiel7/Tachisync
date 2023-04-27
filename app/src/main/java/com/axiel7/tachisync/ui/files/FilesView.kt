@@ -81,7 +81,7 @@ fun FilesView(filesViewModel: FilesViewModel, mainViewModel: MainViewModel) {
     }
 
     LaunchedEffect(context) {
-        filesViewModel.refresh(context)
+        if (filesViewModel.downloadedManga.isEmpty()) filesViewModel.refresh(context)
     }
 }
 

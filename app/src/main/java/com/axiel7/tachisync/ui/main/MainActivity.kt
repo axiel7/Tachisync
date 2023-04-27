@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -211,7 +212,13 @@ fun BottomNavBar(navController: NavController) {
             selected = selectedItem == 0,
             onClick = {
                 selectedItem = 0
-                navController.navigate(FILES_DESTINATION)
+                navController.navigate(FILES_DESTINATION) {
+                    popUpTo(navController.graph.findStartDestination().id) {
+                        saveState = true
+                    }
+                    launchSingleTop = true
+                    restoreState = true
+                }
             },
             icon = { Icon(painter = painterResource(R.drawable.download_24), contentDescription = stringResource(R.string.downloads)) },
             label = { Text(text = stringResource(R.string.downloads)) }
@@ -221,7 +228,13 @@ fun BottomNavBar(navController: NavController) {
             selected = selectedItem == 1,
             onClick = {
                 selectedItem = 1
-                navController.navigate(EXTERNAL_STORAGE_DESTINATION)
+                navController.navigate(EXTERNAL_STORAGE_DESTINATION) {
+                    popUpTo(navController.graph.findStartDestination().id) {
+                        saveState = true
+                    }
+                    launchSingleTop = true
+                    restoreState = true
+                }
             },
             icon = { Icon(painter = painterResource(R.drawable.storage_24), contentDescription = stringResource(R.string.external)) },
             label = { Text(text = stringResource(R.string.external)) }
