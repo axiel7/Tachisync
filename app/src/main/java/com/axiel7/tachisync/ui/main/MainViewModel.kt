@@ -45,9 +45,9 @@ class MainViewModel: BaseViewModel() {
                     isSyncing = false
                     return@launch
                 }
+                setErrorMessage("Sync completed")
             }
             isSyncing = false
-            setErrorMessage("Sync completed")
         }
     }
 }
