@@ -26,7 +26,7 @@ object FileUtils {
     }
 
     fun Context.syncDirectory(sourceDir: DocumentFile, destRootDir: DocumentFile) {
-        if (sourceDir.isDirectory && destRootDir.isDirectory) {
+        if (sourceDir.isDirectory && destRootDir.isDirectory && sourceDir.name != null) {
             // Check if the directory already exist
             var destDir = destRootDir.findFile(sourceDir.name!!)
             if (destDir == null) {
@@ -36,24 +36,29 @@ object FileUtils {
 
             // Copy each file or directory to the destination directory
             sourceDir.listFiles().forEach { file ->
+                if (file.name != null) {
+                    if (file.isDirectory) {
+                        // If the file is a directory, recursively call this function
+                        val childSourceDir = sourceDir.findFile(file.name!!)
+                        val childDestDir = destDir?.findFile(file.name!!)
+                        if (childSourceDir != null && childDestDir != null)
+                            syncDirectory(childSourceDir, childDestDir)
 
-                if (file.isDirectory) {
-                    // If the file is a directory, recursively call this function
-                    val childSourceDir = sourceDir.findFile(file.name!!)
-                    val childDestDir = destDir?.findFile(file.name!!)
-                    syncDirectory(childSourceDir!!, childDestDir!!)
-                } else {
-                    // If the file is a regular file, copy its contents to the destination file
-                    // Check if the file already exist
-                    var destFile = destDir?.findFile(file.name!!)
-                    if (destFile == null) {
-                        destFile = destDir?.createFile(file.type!!, file.name!!)
+                    } else {
+                        // If the file is a regular file, copy its contents to the destination file
+                        // Check if the file already exist
+                        var destFile = destDir?.findFile(file.name!!)
+                        if (destFile == null && file.type != null) {
+                            destFile = destDir?.createFile(file.type!!, file.name!!)
+                        }
+                        if (destFile ?.uri != null) {
+                            val inputStream = contentResolver.openInputStream(file.uri)
+                            val outputStream = contentResolver.openOutputStream(destFile.uri)
+                            if (outputStream != null) inputStream?.copyTo(outputStream)
+                            inputStream?.close()
+                            outputStream?.close()
+                        }
                     }
-                    val inputStream = contentResolver.openInputStream(file.uri)
-                    val outputStream = contentResolver.openOutputStream(destFile?.uri!!)
-                    inputStream?.copyTo(outputStream!!)
-                    inputStream?.close()
-                    outputStream?.close()
                 }
             }
         }
