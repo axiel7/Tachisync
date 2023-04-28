@@ -24,6 +24,7 @@ class MainViewModel: BaseViewModel() {
     fun syncContents(context: Context, contents: List<Manga>, selected: List<Int>) {
         isSyncing = true
         viewModelScope.launch(Dispatchers.IO) {
+            progress = 0f
             if (selected.isEmpty()) setErrorMessage("No content selected")
             else if (externalSyncUri == null) setErrorMessage("No external directory selected")
             else {
