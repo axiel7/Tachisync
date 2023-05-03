@@ -27,6 +27,7 @@ object FileUtils {
 
     fun Context.syncDirectory(sourceDir: DocumentFile, destRootDir: DocumentFile) {
         if (sourceDir.isDirectory && destRootDir.isDirectory && sourceDir.name != null) {
+            if (sourceDir.name!!.endsWith("_tmp")) return
             // Check if the directory already exist
             var destDir = destRootDir.findFile(sourceDir.name!!)
             if (destDir == null) {
