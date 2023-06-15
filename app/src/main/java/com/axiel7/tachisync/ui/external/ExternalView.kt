@@ -31,7 +31,10 @@ import com.axiel7.tachisync.utils.SharedPrefsHelpers
 const val EXTERNAL_STORAGE_DESTINATION = "external_storage"
 
 @Composable
-fun ExternalView(mainViewModel: MainViewModel) {
+fun ExternalView(
+    mainViewModel: MainViewModel,
+    modifier: Modifier = Modifier,
+) {
     val context = LocalContext.current
     val viewModel: ExternalViewModel = viewModel()
     val uriLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -45,7 +48,7 @@ fun ExternalView(mainViewModel: MainViewModel) {
 
     if (mainViewModel.externalSyncUri != null) {
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -68,7 +71,7 @@ fun ExternalView(mainViewModel: MainViewModel) {
         }
     } else if (viewModel.externalStorages.isEmpty()) {
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -83,7 +86,7 @@ fun ExternalView(mainViewModel: MainViewModel) {
             }
         }//:Column
     } else {
-        Column {
+        Column(modifier = modifier) {
             Text(
                 text = stringResource(R.string.select_device_to_sync),
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)

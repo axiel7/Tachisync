@@ -33,7 +33,11 @@ const val FILES_DESTINATION = "files"
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun FilesView(filesViewModel: FilesViewModel, mainViewModel: MainViewModel) {
+fun FilesView(
+    filesViewModel: FilesViewModel,
+    mainViewModel: MainViewModel,
+    contentPadding: PaddingValues = PaddingValues(),
+) {
     val context = LocalContext.current
     val pullRefreshState = rememberPullRefreshState(filesViewModel.isLoading, { filesViewModel.refresh(context) })
     val uriLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -52,7 +56,8 @@ fun FilesView(filesViewModel: FilesViewModel, mainViewModel: MainViewModel) {
             .pullRefresh(pullRefreshState)
     ) {
         LazyColumn(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = contentPadding
         ) {
             itemsIndexed(filesViewModel.downloadedManga, key = { _, manga -> manga.file.uri }) { index, manga ->
                 SelectableMangaItemView(manga = manga, onClick = { selected ->

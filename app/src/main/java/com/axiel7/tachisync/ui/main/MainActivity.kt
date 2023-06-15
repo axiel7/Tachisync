@@ -6,12 +6,21 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.*
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -72,7 +81,7 @@ fun MainView() {
         }
     }
 
-    com.google.accompanist.insets.ui.Scaffold(
+    Scaffold(
         topBar = {
             AnimatedVisibility(
                 visible = !isFullScreenDestination,
@@ -151,20 +160,53 @@ fun MainView() {
                 }
             }
         },
-        backgroundColor = MaterialTheme.colorScheme.background
-    ) {
+        contentWindowInsets = WindowInsets.systemBars
+            .only(WindowInsetsSides.Horizontal)
+    ) { padding ->
+        val topPadding by animateDpAsState(
+            targetValue = padding.calculateTopPadding(),
+            label = "top_bar_padding"
+        )
+        val bottomPadding by animateDpAsState(
+            targetValue = padding.calculateBottomPadding(),
+            label = "bottom_bar_padding"
+        )
         NavHost(
             navController = navController,
             startDestination = FILES_DESTINATION,
-            modifier = Modifier.padding(it)
+            modifier = Modifier.padding(
+                start = padding.calculateStartPadding(LocalLayoutDirection.current),
+                end = padding.calculateEndPadding(LocalLayoutDirection.current),
+            )
         ) {
             composable(FILES_DESTINATION) {
-                FilesView(filesViewModel = filesViewModel, mainViewModel = viewModel)
+                FilesView(
+                    filesViewModel = filesViewModel,
+                    mainViewModel = viewModel,
+                    contentPadding = PaddingValues(
+                        top = topPadding,
+                        bottom = bottomPadding
+                    )
+                )
             }
 
-            composable(EXTERNAL_STORAGE_DESTINATION) { ExternalView(mainViewModel = viewModel) }
+            composable(EXTERNAL_STORAGE_DESTINATION) {
+                ExternalView(
+                    mainViewModel = viewModel,
+                    modifier = Modifier.padding(
+                        top = topPadding,
+                        bottom = bottomPadding
+                    )
+                )
+            }
 
-            composable(ABOUT_DESTINATION) { AboutView(navController = navController) }
+            composable(ABOUT_DESTINATION) {
+                AboutView(
+                    navigateBack = {
+                        navController.popBackStack()
+                    }
+                )
+            }
         }
     }
 

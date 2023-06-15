@@ -13,8 +13,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.axiel7.tachisync.BuildConfig
 import com.axiel7.tachisync.R
 import com.axiel7.tachisync.ui.theme.TachisyncTheme
@@ -25,7 +23,7 @@ const val ABOUT_DESTINATION = "about"
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AboutView(
-    navController: NavController
+    navigateBack: () -> Unit
 ) {
     val context = LocalContext.current
     Scaffold(
@@ -33,7 +31,7 @@ fun AboutView(
             TopAppBar(
                 title = { Text(text = stringResource(R.string.about))},
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
+                    IconButton(onClick = navigateBack) {
                         Icon(painter = painterResource(R.drawable.arrow_back_24), contentDescription = stringResource(R.string.back))
                     }
                 }
@@ -119,6 +117,6 @@ fun AboutItem(
 @Composable
 fun AboutPreview() {
     TachisyncTheme {
-        AboutView(navController = rememberNavController())
+        AboutView(navigateBack = {})
     }
 }
