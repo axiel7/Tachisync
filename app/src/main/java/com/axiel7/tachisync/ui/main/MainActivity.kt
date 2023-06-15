@@ -238,7 +238,7 @@ fun SyncingDialog(viewModel: MainViewModel) {
         title = { Text(text = stringResource(R.string.syncing), modifier = Modifier.padding(16.dp)) },
         text = {
             LinearProgressIndicator(
-                progress = viewModel.progress,
+                progress = viewModel.progress.value,
                 modifier = Modifier.padding(8.dp)
             )
         }

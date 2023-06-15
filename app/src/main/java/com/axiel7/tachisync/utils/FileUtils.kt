@@ -3,7 +3,7 @@ package com.axiel7.tachisync.utils
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.provider.DocumentsContract
+import androidx.compose.runtime.MutableState
 import androidx.documentfile.provider.DocumentFile
 
 object FileUtils {
@@ -25,7 +25,13 @@ object FileUtils {
         contentResolver.releasePersistableUriPermission(uri, flags)
     }
 
-    fun Context.syncDirectory(sourceDir: DocumentFile, destRootDir: DocumentFile) {
+    fun Context.syncDirectory(
+        sourceDir: DocumentFile,
+        destRootDir: DocumentFile,
+        progress: MutableState<Float>,
+        currentFileCount: MutableState<Int>,
+        total: Float,
+    ) {
         if (sourceDir.isDirectory && destRootDir.isDirectory && sourceDir.name != null) {
             if (sourceDir.name!!.endsWith("_tmp")) return
             // Check if the directory already exist
@@ -43,9 +49,10 @@ object FileUtils {
                         val childSourceDir = sourceDir.findFile(file.name!!)
                         val childDestDir = destDir?.findFile(file.name!!)
                         if (childSourceDir != null && childDestDir != null)
-                            syncDirectory(childSourceDir, childDestDir)
+                            syncDirectory(childSourceDir, childDestDir, progress, currentFileCount, total)
 
                     } else {
+                        currentFileCount.value += 1
                         // If the file is a regular file, copy its contents to the destination file
                         // Check if the file already exist
                         var destFile = destDir?.findFile(file.name!!)
@@ -59,6 +66,7 @@ object FileUtils {
                             inputStream?.close()
                             outputStream?.close()
                         }
+                        progress.value = currentFileCount.value.div(total)
                     }
                 }
             }

@@ -22,7 +22,7 @@ class FilesViewModel: BaseViewModel() {
     var selectedManga = mutableListOf<Int>()
     var selectedCount by mutableStateOf(0)
 
-    fun onSelectedManga(index: Int, manga: Manga, selected: Boolean) {
+    fun onSelectedManga(index: Int, selected: Boolean) {
         downloadedManga[index] = downloadedManga[index].copy(isSelected = selected)
         if (selected) {
             selectedManga.add(index)

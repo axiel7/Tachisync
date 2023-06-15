@@ -19,12 +19,13 @@ class MainViewModel: BaseViewModel() {
     var externalSyncUri by mutableStateOf<Uri?>(null)
 
     var isSyncing by mutableStateOf(false)
-    var progress by mutableStateOf(0f)
+    var progress = mutableStateOf(0f)
+    var currentFileCount = mutableStateOf(0)
 
     fun syncContents(context: Context, contents: List<Manga>, selected: List<Int>) {
         isSyncing = true
         viewModelScope.launch(Dispatchers.IO) {
-            progress = 0f
+            progress.value = 0f
             if (selected.isEmpty()) setErrorMessage("No content selected")
             else if (externalSyncUri == null) setErrorMessage("No external directory selected")
             else {
@@ -34,11 +35,16 @@ class MainViewModel: BaseViewModel() {
                         setErrorMessage("Invalid external directory")
                     } else {
                         val selectedContent = contents.filterIndexed { index, _ -> selected.contains(index) }
-                        val selectedCount = selectedContent.size.toFloat()
                         val files = selectedContent.map { it.file }
-                        files.forEachIndexed { index, file ->
-                            context.syncDirectory(sourceDir = file, destRootDir = destDir!!)
-                            progress = (index + 1).div(selectedCount)
+                        val total = selectedContent.sumOf { it.chapters }.toFloat()
+                        files.forEach { file ->
+                            context.syncDirectory(
+                                sourceDir = file,
+                                destRootDir = destDir!!,
+                                progress = progress,
+                                currentFileCount = currentFileCount,
+                                total = total
+                            )
                         }
                     }
                 } catch (e: Exception) {
