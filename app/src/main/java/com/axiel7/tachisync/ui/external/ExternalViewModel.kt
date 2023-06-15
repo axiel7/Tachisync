@@ -14,7 +14,6 @@ import com.axiel7.tachisync.utils.FileUtils.releaseUriPermissions
 import com.axiel7.tachisync.utils.SharedPrefsHelpers
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.io.File
 
 class ExternalViewModel: BaseViewModel() {
 

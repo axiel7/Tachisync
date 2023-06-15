@@ -20,7 +20,7 @@ class MainViewModel: BaseViewModel() {
 
     var isSyncing by mutableStateOf(false)
     var progress = mutableStateOf(0f)
-    var currentFileCount = mutableStateOf(0)
+    private var currentFileCount = mutableStateOf(0)
 
     fun syncContents(context: Context, contents: List<Manga>, selected: List<Int>) {
         isSyncing = true
