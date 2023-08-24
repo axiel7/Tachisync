@@ -3,7 +3,8 @@ package com.axiel7.tachisync.utils
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.MutableFloatState
+import androidx.compose.runtime.MutableIntState
 import androidx.documentfile.provider.DocumentFile
 
 object FileUtils {
@@ -28,8 +29,8 @@ object FileUtils {
     fun Context.syncDirectory(
         sourceDir: DocumentFile,
         destRootDir: DocumentFile,
-        progress: MutableState<Float>,
-        currentFileCount: MutableState<Int>,
+        progress: MutableFloatState,
+        currentFileCount: MutableIntState,
         total: Float,
     ) {
         if (sourceDir.isDirectory && destRootDir.isDirectory && sourceDir.name != null) {
@@ -49,24 +50,29 @@ object FileUtils {
                         val childSourceDir = sourceDir.findFile(file.name!!)
                         val childDestDir = destDir?.findFile(file.name!!)
                         if (childSourceDir != null && childDestDir != null)
-                            syncDirectory(childSourceDir, childDestDir, progress, currentFileCount, total)
-
+                            syncDirectory(
+                                sourceDir = childSourceDir,
+                                destRootDir = childDestDir,
+                                progress = progress,
+                                currentFileCount = currentFileCount,
+                                total = total
+                            )
                     } else {
-                        currentFileCount.value += 1
+                        currentFileCount.intValue += 1
                         // If the file is a regular file, copy its contents to the destination file
                         // Check if the file already exist
                         var destFile = destDir?.findFile(file.name!!)
                         if (destFile == null && file.type != null) {
                             destFile = destDir?.createFile(file.type!!, file.name!!)
                         }
-                        if (destFile ?.uri != null) {
+                        if (destFile?.uri != null) {
                             val inputStream = contentResolver.openInputStream(file.uri)
                             val outputStream = contentResolver.openOutputStream(destFile.uri)
                             if (outputStream != null) inputStream?.copyTo(outputStream)
                             inputStream?.close()
                             outputStream?.close()
                         }
-                        progress.value = currentFileCount.value.div(total)
+                        progress.floatValue = currentFileCount.intValue.div(total)
                     }
                 }
             }

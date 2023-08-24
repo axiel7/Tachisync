@@ -3,6 +3,7 @@ package com.axiel7.tachisync.ui.files
 import android.content.Context
 import android.net.Uri
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -13,14 +14,15 @@ import com.axiel7.tachisync.ui.base.BaseViewModel
 import com.axiel7.tachisync.utils.FileUtils.areUriPermissionsGranted
 import com.axiel7.tachisync.utils.FileUtils.releaseUriPermissions
 import com.axiel7.tachisync.utils.SharedPrefsHelpers
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
-class FilesViewModel: BaseViewModel() {
+class FilesViewModel : BaseViewModel() {
 
     var downloadedManga = mutableStateListOf<Manga>()
 
     var selectedManga = mutableListOf<Int>()
-    var selectedCount by mutableStateOf(0)
+    var selectedCount by mutableIntStateOf(0)
 
     fun onSelectedManga(index: Int, selected: Boolean) {
         downloadedManga[index] = downloadedManga[index].copy(isSelected = selected)
@@ -80,7 +82,13 @@ class FilesViewModel: BaseViewModel() {
                     sourceFile.listFiles().forEach { series ->
                         val chaptersDownloaded = series.listFiles().size
                         if (chaptersDownloaded > 0)
-                            tempContent.add(Manga(series.name ?: "Unknown", chaptersDownloaded, series))
+                            tempContent.add(
+                                Manga(
+                                    name = series.name ?: "Unknown",
+                                    chapters = chaptersDownloaded,
+                                    file = series
+                                )
+                            )
                     }
                 }
                 downloadedManga.clear()

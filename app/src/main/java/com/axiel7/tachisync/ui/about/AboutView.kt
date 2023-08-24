@@ -2,8 +2,20 @@ package com.axiel7.tachisync.ui.about
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,10 +41,13 @@ fun AboutView(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = stringResource(R.string.about))},
+                title = { Text(text = stringResource(R.string.about)) },
                 navigationIcon = {
                     IconButton(onClick = navigateBack) {
-                        Icon(painter = painterResource(R.drawable.arrow_back_24), contentDescription = stringResource(R.string.back))
+                        Icon(
+                            painter = painterResource(R.drawable.arrow_back_24),
+                            contentDescription = stringResource(R.string.back)
+                        )
                     }
                 }
             )
@@ -47,7 +62,7 @@ fun AboutView(
                 icon = R.drawable.code_24,
                 onClick = { context.openAction("https://github.com/axiel7/Tachisync") }
             )
-            
+
             AboutItem(
                 title = stringResource(R.string.developer),
                 subtitle = "axiel7",
@@ -86,9 +101,10 @@ fun AboutItem(
                 tint = MaterialTheme.colorScheme.primary
             )
         } else {
-            Spacer(modifier = Modifier
-                .padding(16.dp)
-                .size(24.dp)
+            Spacer(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .size(24.dp)
             )
         }
 

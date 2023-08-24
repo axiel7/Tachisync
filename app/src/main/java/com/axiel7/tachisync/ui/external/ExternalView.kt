@@ -6,10 +6,19 @@ import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
@@ -37,14 +46,17 @@ fun ExternalView(
 ) {
     val context = LocalContext.current
     val viewModel: ExternalViewModel = viewModel()
-    val uriLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        it.data?.data?.let { uri ->
-            context.contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION or
-                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-            SharedPrefsHelpers.instance?.saveString("external_uri", uri.toString())
-            mainViewModel.externalSyncUri = uri
+    val uriLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            it.data?.data?.let { uri ->
+                context.contentResolver.takePersistableUriPermission(
+                    uri, Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                            Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                )
+                SharedPrefsHelpers.instance?.saveString("external_uri", uri.toString())
+                mainViewModel.externalSyncUri = uri
+            }
         }
-    }
 
     if (mainViewModel.externalSyncUri != null) {
         Column(
@@ -53,7 +65,10 @@ fun ExternalView(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = stringResource(R.string.contents_synced_on, mainViewModel.externalSyncUri?.lastPathSegment ?: ""),
+                text = stringResource(
+                    R.string.contents_synced_on,
+                    mainViewModel.externalSyncUri?.lastPathSegment ?: ""
+                ),
                 modifier = Modifier.padding(horizontal = 16.dp),
                 textAlign = TextAlign.Center
             )
@@ -81,8 +96,14 @@ fun ExternalView(
             )
 
             TextButton(onClick = { viewModel.getExternalStorages(context) }) {
-                Icon(painter = painterResource(R.drawable.refresh_24), contentDescription = stringResource(R.string.refresh))
-                Text(text = stringResource(R.string.refresh), modifier = Modifier.padding(start = 4.dp))
+                Icon(
+                    painter = painterResource(R.drawable.refresh_24),
+                    contentDescription = stringResource(R.string.refresh)
+                )
+                Text(
+                    text = stringResource(R.string.refresh),
+                    modifier = Modifier.padding(start = 4.dp)
+                )
             }
         }//:Column
     } else {
@@ -113,6 +134,7 @@ fun ExternalView(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             uriLauncher.launch(viewModel.selectedDevice?.createOpenDocumentTreeIntent())
         } else {
+            @Suppress("DEPRECATION")
             uriLauncher.launch(viewModel.selectedDevice?.createAccessIntent(null))
         }
         viewModel.openIntentForDirectory = false
@@ -140,7 +162,10 @@ fun ExternalDeviceItemView(
             .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(painter = painterResource(R.drawable.usb_24), contentDescription = stringResource(R.string.device))
+        Icon(
+            painter = painterResource(R.drawable.usb_24),
+            contentDescription = stringResource(R.string.device)
+        )
         Text(
             text = deviceName,
             modifier = Modifier.padding(start = 8.dp),

@@ -5,8 +5,12 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.animation.*
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -16,8 +20,28 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.surfaceColorAtElevation
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -61,7 +85,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainView() {
     val context = LocalContext.current
@@ -135,7 +159,9 @@ fun MainView() {
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = if (showEditToolbar) MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp)
+                        containerColor = if (showEditToolbar) MaterialTheme.colorScheme.surfaceColorAtElevation(
+                            3.dp
+                        )
                         else MaterialTheme.colorScheme.background
                     )
                 )
@@ -158,11 +184,21 @@ fun MainView() {
             ) {
                 ExtendedFloatingActionButton(
                     onClick = {
-                        viewModel.syncContents(context, filesViewModel.downloadedManga, filesViewModel.selectedManga)
+                        viewModel.syncContents(
+                            context,
+                            filesViewModel.downloadedManga,
+                            filesViewModel.selectedManga
+                        )
                     }
                 ) {
-                    Icon(painter = painterResource(R.drawable.sync_24), contentDescription = stringResource(R.string.sync))
-                    Text(text = stringResource(R.string.sync), modifier = Modifier.padding(start = 8.dp))
+                    Icon(
+                        painter = painterResource(R.drawable.sync_24),
+                        contentDescription = stringResource(R.string.sync)
+                    )
+                    Text(
+                        text = stringResource(R.string.sync),
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
                 }
             }
         },
@@ -241,7 +277,12 @@ fun SyncingDialog(viewModel: MainViewModel) {
     AlertDialog(
         onDismissRequest = { },
         confirmButton = { },
-        title = { Text(text = stringResource(R.string.syncing), modifier = Modifier.padding(16.dp)) },
+        title = {
+            Text(
+                text = stringResource(R.string.syncing),
+                modifier = Modifier.padding(16.dp)
+            )
+        },
         text = {
             LinearProgressIndicator(
                 progress = viewModel.progress.value,
@@ -268,7 +309,12 @@ fun BottomNavBar(navController: NavController) {
                     restoreState = true
                 }
             },
-            icon = { Icon(painter = painterResource(R.drawable.download_24), contentDescription = stringResource(R.string.downloads)) },
+            icon = {
+                Icon(
+                    painter = painterResource(R.drawable.download_24),
+                    contentDescription = stringResource(R.string.downloads)
+                )
+            },
             label = { Text(text = stringResource(R.string.downloads)) }
         )
 
@@ -284,7 +330,12 @@ fun BottomNavBar(navController: NavController) {
                     restoreState = true
                 }
             },
-            icon = { Icon(painter = painterResource(R.drawable.storage_24), contentDescription = stringResource(R.string.external)) },
+            icon = {
+                Icon(
+                    painter = painterResource(R.drawable.storage_24),
+                    contentDescription = stringResource(R.string.external)
+                )
+            },
             label = { Text(text = stringResource(R.string.external)) }
         )
     }

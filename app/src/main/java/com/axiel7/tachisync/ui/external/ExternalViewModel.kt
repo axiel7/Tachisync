@@ -15,7 +15,7 @@ import com.axiel7.tachisync.utils.SharedPrefsHelpers
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class ExternalViewModel: BaseViewModel() {
+class ExternalViewModel : BaseViewModel() {
 
     var externalStorages by mutableStateOf(listOf<StorageVolume>())
 
@@ -23,7 +23,8 @@ class ExternalViewModel: BaseViewModel() {
         isLoading = true
         viewModelScope.launch(Dispatchers.IO) {
             val storageManager = context.getSystemService(Context.STORAGE_SERVICE) as StorageManager
-            externalStorages = storageManager.storageVolumes.filter { it.isRemovable && it.state == Environment.MEDIA_MOUNTED }
+            externalStorages =
+                storageManager.storageVolumes.filter { it.isRemovable && it.state == Environment.MEDIA_MOUNTED }
             isLoading = false
         }
     }
