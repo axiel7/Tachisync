@@ -7,6 +7,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
@@ -221,7 +224,9 @@ fun MainView() {
             modifier = Modifier.padding(
                 start = padding.calculateStartPadding(LocalLayoutDirection.current),
                 end = padding.calculateEndPadding(LocalLayoutDirection.current),
-            )
+            ),
+            enterTransition = { fadeIn(tween(400)) },
+            exitTransition = { fadeOut(tween(400)) }
         ) {
             composable(FILES_DESTINATION) {
                 FilesView(
