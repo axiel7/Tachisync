@@ -39,7 +39,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -144,11 +144,13 @@ fun MainView() {
                                 )
                             }
                         } else {
-                            IconButton(onClick = { filesViewModel.refresh(context) }) {
-                                Icon(
-                                    painter = painterResource(R.drawable.refresh_24),
-                                    contentDescription = stringResource(R.string.refresh)
-                                )
+                            if (navBackStackEntry?.destination?.route == FILES_DESTINATION) {
+                                IconButton(onClick = { filesViewModel.refresh(context) }) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.refresh_24),
+                                        contentDescription = stringResource(R.string.refresh)
+                                    )
+                                }
                             }
                             IconButton(onClick = { navController.navigate(ABOUT_DESTINATION) }) {
                                 Icon(
@@ -285,7 +287,7 @@ fun SyncingDialog(viewModel: MainViewModel) {
         },
         text = {
             LinearProgressIndicator(
-                progress = viewModel.progress.value,
+                progress = viewModel.progress.floatValue,
                 modifier = Modifier.padding(8.dp)
             )
         }
@@ -294,7 +296,7 @@ fun SyncingDialog(viewModel: MainViewModel) {
 
 @Composable
 fun BottomNavBar(navController: NavController) {
-    var selectedItem by remember { mutableStateOf(0) }
+    var selectedItem by remember { mutableIntStateOf(0) }
 
     NavigationBar {
         NavigationBarItem(
