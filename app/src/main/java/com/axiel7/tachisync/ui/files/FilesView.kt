@@ -8,10 +8,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.pullrefresh.PullRefreshIndicator
-import androidx.compose.material.pullrefresh.pullRefresh
-import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -31,7 +27,6 @@ import com.axiel7.tachisync.utils.SharedPrefsHelpers
 
 const val FILES_DESTINATION = "files"
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun FilesView(
     filesViewModel: FilesViewModel,
@@ -39,7 +34,6 @@ fun FilesView(
     contentPadding: PaddingValues = PaddingValues(),
 ) {
     val context = LocalContext.current
-    val pullRefreshState = rememberPullRefreshState(filesViewModel.isLoading, { filesViewModel.refresh(context) })
     val uriLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         it.data?.data?.let { uri ->
             context.contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION or
@@ -51,9 +45,7 @@ fun FilesView(
     }
 
     Box(
-        modifier = Modifier
-            .clipToBounds()
-            .pullRefresh(pullRefreshState)
+        modifier = Modifier.clipToBounds()
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
@@ -66,7 +58,11 @@ fun FilesView(
             }
         }
 
-        PullRefreshIndicator(filesViewModel.isLoading, pullRefreshState, Modifier.align(Alignment.TopCenter))
+        if (filesViewModel.isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.align(Alignment.Center)
+            )
+        }
     }
 
     if (filesViewModel.openIntentForDirectory) {

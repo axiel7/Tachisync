@@ -120,6 +120,12 @@ fun MainView() {
                                 )
                             }
                         } else {
+                            IconButton(onClick = { filesViewModel.refresh(context) }) {
+                                Icon(
+                                    painter = painterResource(R.drawable.refresh_24),
+                                    contentDescription = stringResource(R.string.refresh)
+                                )
+                            }
                             IconButton(onClick = { navController.navigate(ABOUT_DESTINATION) }) {
                                 Icon(
                                     painter = painterResource(R.drawable.help_outline_24),
