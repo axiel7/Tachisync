@@ -9,16 +9,32 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.viewModelScope
+import com.axiel7.tachisync.App
+import com.axiel7.tachisync.data.datastore.PreferencesDataStore.EXTERNAL_URI_KEY
+import com.axiel7.tachisync.data.datastore.PreferencesDataStore.TACHIYOMI_URI_KEY
+import com.axiel7.tachisync.data.datastore.PreferencesRepository
 import com.axiel7.tachisync.data.model.Manga
 import com.axiel7.tachisync.ui.base.BaseViewModel
 import com.axiel7.tachisync.utils.FileUtils.syncDirectory
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class MainViewModel : BaseViewModel() {
 
-    var tachiyomiUri by mutableStateOf<Uri?>(null)
-    var externalSyncUri by mutableStateOf<Uri?>(null)
+    val externalSyncUri = App.dataStore.data
+        .map { it[EXTERNAL_URI_KEY]?.let { uri -> Uri.parse(uri) } }
+        .stateIn(viewModelScope, SharingStarted.Lazily, null)
+
+    fun onExternalUriChanged(value: String) = viewModelScope.launch {
+        PreferencesRepository.set(EXTERNAL_URI_KEY, value)
+    }
+
+    fun onTachiyomiUriChanged(value: String) = viewModelScope.launch {
+        PreferencesRepository.set(TACHIYOMI_URI_KEY, value)
+    }
 
     var isSyncing by mutableStateOf(false)
     var progress = mutableFloatStateOf(0f)
@@ -28,11 +44,12 @@ class MainViewModel : BaseViewModel() {
         isSyncing = true
         viewModelScope.launch(Dispatchers.IO) {
             progress.floatValue = 0f
+            val externalUri = externalSyncUri.value
             if (selected.isEmpty()) setErrorMessage("No content selected")
-            else if (externalSyncUri == null) setErrorMessage("No external directory selected")
+            else if (externalUri == null) setErrorMessage("No external directory selected")
             else {
                 try {
-                    val destDir = DocumentFile.fromTreeUri(context, externalSyncUri!!)
+                    val destDir = DocumentFile.fromTreeUri(context, externalUri)
                     if (destDir?.isDirectory == false) {
                         setErrorMessage("Invalid external directory")
                     } else {

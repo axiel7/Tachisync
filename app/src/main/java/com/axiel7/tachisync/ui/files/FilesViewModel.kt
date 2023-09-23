@@ -9,11 +9,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.viewModelScope
+import com.axiel7.tachisync.App
+import com.axiel7.tachisync.data.datastore.PreferencesDataStore.TACHIYOMI_URI_KEY
+import com.axiel7.tachisync.data.datastore.PreferencesRepository
 import com.axiel7.tachisync.data.model.Manga
 import com.axiel7.tachisync.ui.base.BaseViewModel
 import com.axiel7.tachisync.utils.FileUtils.areUriPermissionsGranted
 import com.axiel7.tachisync.utils.FileUtils.releaseUriPermissions
-import com.axiel7.tachisync.utils.SharedPrefsHelpers
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -60,7 +62,7 @@ class FilesViewModel : BaseViewModel() {
     fun refresh(context: Context) {
         viewModelScope.launch(Dispatchers.IO) {
             deselectAllManga()
-            val tachiyomiUri = SharedPrefsHelpers.instance?.getString("tachiyomi_uri", null)
+            val tachiyomiUri = PreferencesRepository.get(TACHIYOMI_URI_KEY)
             if (tachiyomiUri.isNullOrEmpty() || !context.areUriPermissionsGranted(tachiyomiUri)) {
                 openTachiyomiDirectoryHelpDialog = true
             } else {
@@ -75,8 +77,8 @@ class FilesViewModel : BaseViewModel() {
             val tempContent = mutableListOf<Manga>()
             val sourcesDir = DocumentFile.fromTreeUri(context, downloadsUri)
             if (sourcesDir == null || !sourcesDir.exists()) {
-                context.releaseUriPermissions(downloadsUri)
-                SharedPrefsHelpers.instance?.deleteValue("tachiyomi_uri")
+                App.applicationContext.releaseUriPermissions(downloadsUri)
+                PreferencesRepository.remove(TACHIYOMI_URI_KEY)
             } else {
                 sourcesDir.listFiles().forEach { sourceFile ->
                     sourceFile.listFiles().forEach { series ->

@@ -1,6 +1,5 @@
 package com.axiel7.tachisync.ui.main
 
-import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -39,7 +38,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -69,7 +67,6 @@ import com.axiel7.tachisync.ui.files.FILES_DESTINATION
 import com.axiel7.tachisync.ui.files.FilesView
 import com.axiel7.tachisync.ui.files.FilesViewModel
 import com.axiel7.tachisync.ui.theme.TachisyncTheme
-import com.axiel7.tachisync.utils.SharedPrefsHelpers
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -267,16 +264,6 @@ fun MainView() {
     if (viewModel.isSyncing) {
         SyncingDialog(viewModel = viewModel)
     }
-
-    LaunchedEffect(context) {
-        SharedPrefsHelpers.instance?.getString("external_uri", null)?.let {
-            viewModel.externalSyncUri = Uri.parse(it)
-        }
-        SharedPrefsHelpers.instance?.getString("tachiyomi_uri", null)?.let {
-            viewModel.tachiyomiUri = Uri.parse(it)
-        }
-    }
-
 }
 
 @Composable

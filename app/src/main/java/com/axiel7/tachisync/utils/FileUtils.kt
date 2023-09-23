@@ -3,11 +3,28 @@ package com.axiel7.tachisync.utils
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableFloatState
 import androidx.compose.runtime.MutableIntState
 import androidx.documentfile.provider.DocumentFile
+import com.axiel7.tachisync.App
 
 object FileUtils {
+
+    @Composable
+    fun rememberUriLauncher(onUriReceived: (Uri) -> Unit) = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) {
+        it.data?.data?.let { uri ->
+            App.applicationContext.contentResolver.takePersistableUriPermission(
+                uri, Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+            )
+            onUriReceived(uri)
+        }
+    }
 
     fun Context.areUriPermissionsGranted(uriString: String): Boolean {
         val list = contentResolver.persistedUriPermissions

@@ -2,8 +2,6 @@ package com.axiel7.tachisync.ui.files
 
 import android.content.Intent
 import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -39,7 +37,7 @@ import com.axiel7.tachisync.R
 import com.axiel7.tachisync.data.model.Manga
 import com.axiel7.tachisync.ui.main.MainViewModel
 import com.axiel7.tachisync.ui.theme.TachisyncTheme
-import com.axiel7.tachisync.utils.SharedPrefsHelpers
+import com.axiel7.tachisync.utils.FileUtils.rememberUriLauncher
 
 const val FILES_DESTINATION = "files"
 
@@ -50,18 +48,30 @@ fun FilesView(
     contentPadding: PaddingValues = PaddingValues(),
 ) {
     val context = LocalContext.current
-    val uriLauncher =
-        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            it.data?.data?.let { uri ->
-                context.contentResolver.takePersistableUriPermission(
-                    uri, Intent.FLAG_GRANT_READ_URI_PERMISSION or
-                            Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                )
-                SharedPrefsHelpers.instance?.saveString("tachiyomi_uri", uri.toString())
-                mainViewModel.tachiyomiUri = uri
-                filesViewModel.readDownloadsDir(uri, context)
-            }
+    val uriLauncher = rememberUriLauncher { uri ->
+        mainViewModel.onTachiyomiUriChanged(uri.toString())
+        filesViewModel.readDownloadsDir(uri, context)
+    }
+
+    if (filesViewModel.openIntentForDirectory) {
+        Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
+            uriLauncher.launch(this)
         }
+        filesViewModel.openIntentForDirectory = false
+    }
+
+    if (filesViewModel.openTachiyomiDirectoryHelpDialog) {
+        TachiyomiDirectoryHelpDialog(viewModel = filesViewModel)
+    }
+
+    if (filesViewModel.showMessage) {
+        Toast.makeText(context, filesViewModel.message, Toast.LENGTH_SHORT).show()
+        filesViewModel.showMessage = false
+    }
+
+    LaunchedEffect(context) {
+        if (filesViewModel.downloadedManga.isEmpty()) filesViewModel.refresh(context)
+    }
 
     Box(
         modifier = Modifier.clipToBounds()
@@ -84,26 +94,6 @@ fun FilesView(
                 modifier = Modifier.align(Alignment.Center)
             )
         }
-    }
-
-    if (filesViewModel.openIntentForDirectory) {
-        Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
-            uriLauncher.launch(this)
-        }
-        filesViewModel.openIntentForDirectory = false
-    }
-
-    if (filesViewModel.openTachiyomiDirectoryHelpDialog) {
-        TachiyomiDirectoryHelpDialog(viewModel = filesViewModel)
-    }
-
-    if (filesViewModel.showMessage) {
-        Toast.makeText(context, filesViewModel.message, Toast.LENGTH_SHORT).show()
-        filesViewModel.showMessage = false
-    }
-
-    LaunchedEffect(context) {
-        if (filesViewModel.downloadedManga.isEmpty()) filesViewModel.refresh(context)
     }
 }
 

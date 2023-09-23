@@ -9,9 +9,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
+import com.axiel7.tachisync.App
+import com.axiel7.tachisync.data.datastore.PreferencesDataStore.EXTERNAL_URI_KEY
+import com.axiel7.tachisync.data.datastore.PreferencesRepository
 import com.axiel7.tachisync.ui.base.BaseViewModel
 import com.axiel7.tachisync.utils.FileUtils.releaseUriPermissions
-import com.axiel7.tachisync.utils.SharedPrefsHelpers
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -34,11 +36,11 @@ class ExternalViewModel : BaseViewModel() {
 
     var openExternalDirectoryHelpDialog by mutableStateOf(false)
 
-    fun reset(context: Context) {
+    fun reset() {
         viewModelScope.launch(Dispatchers.IO) {
-            SharedPrefsHelpers.instance?.getString("external_uri", null)?.let {
-                context.releaseUriPermissions(Uri.parse(it))
-                SharedPrefsHelpers.instance?.deleteValue("external_uri")
+            PreferencesRepository.get(EXTERNAL_URI_KEY)?.let { uri ->
+                App.applicationContext.releaseUriPermissions(Uri.parse(uri))
+                PreferencesRepository.remove(EXTERNAL_URI_KEY)
             }
             externalStorages = emptyList()
             selectedDevice = null

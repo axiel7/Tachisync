@@ -65,7 +65,7 @@ dependencies {
 
     // Android X
     implementation("androidx.core:core-ktx:1.12.0")
-    implementation("androidx.preference:preference-ktx:1.2.1")
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
     implementation("androidx.documentfile:documentfile:1.0.1")
 
     // Compose

@@ -1,10 +1,6 @@
 package com.axiel7.tachisync.ui.external
 
-import android.content.Intent
-import android.net.Uri
 import android.os.Build
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -21,6 +17,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -35,7 +33,7 @@ import com.axiel7.tachisync.R
 import com.axiel7.tachisync.ui.main.MainViewModel
 import com.axiel7.tachisync.ui.theme.TachisyncTheme
 import com.axiel7.tachisync.utils.FileUtils.areUriPermissionsGranted
-import com.axiel7.tachisync.utils.SharedPrefsHelpers
+import com.axiel7.tachisync.utils.FileUtils.rememberUriLauncher
 
 const val EXTERNAL_STORAGE_DESTINATION = "external_storage"
 
@@ -46,19 +44,32 @@ fun ExternalView(
 ) {
     val context = LocalContext.current
     val viewModel: ExternalViewModel = viewModel()
-    val uriLauncher =
-        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            it.data?.data?.let { uri ->
-                context.contentResolver.takePersistableUriPermission(
-                    uri, Intent.FLAG_GRANT_READ_URI_PERMISSION or
-                            Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                )
-                SharedPrefsHelpers.instance?.saveString("external_uri", uri.toString())
-                mainViewModel.externalSyncUri = uri
-            }
-        }
+    val uriLauncher = rememberUriLauncher { uri ->
+        mainViewModel.onExternalUriChanged(uri.toString())
+    }
+    val externalUri by mainViewModel.externalSyncUri.collectAsState()
 
-    if (mainViewModel.externalSyncUri != null) {
+    LaunchedEffect(externalUri) {
+        if (externalUri == null || !context.areUriPermissionsGranted(externalUri.toString())) {
+            viewModel.getExternalStorages(context)
+        }
+    }
+
+    if (viewModel.openExternalDirectoryHelpDialog) {
+        ExternalDirectoryHelpDialog(viewModel = viewModel)
+    }
+
+    if (viewModel.openIntentForDirectory) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            uriLauncher.launch(viewModel.selectedDevice?.createOpenDocumentTreeIntent())
+        } else {
+            @Suppress("DEPRECATION")
+            uriLauncher.launch(viewModel.selectedDevice?.createAccessIntent(null))
+        }
+        viewModel.openIntentForDirectory = false
+    }
+
+    if (externalUri != null) {
         Column(
             modifier = modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Center,
@@ -67,7 +78,7 @@ fun ExternalView(
             Text(
                 text = stringResource(
                     R.string.contents_synced_on,
-                    mainViewModel.externalSyncUri?.lastPathSegment ?: ""
+                    externalUri?.lastPathSegment ?: ""
                 ),
                 modifier = Modifier.padding(horizontal = 16.dp),
                 textAlign = TextAlign.Center
@@ -75,8 +86,7 @@ fun ExternalView(
 
             Button(
                 onClick = {
-                    viewModel.reset(context)
-                    mainViewModel.externalSyncUri = null
+                    viewModel.reset()
                     viewModel.getExternalStorages(context)
                 },
                 modifier = Modifier.padding(16.dp)
@@ -124,29 +134,6 @@ fun ExternalView(
                 }
             }//:LazyColumn
         }//:Column
-    }
-
-    if (viewModel.openExternalDirectoryHelpDialog) {
-        ExternalDirectoryHelpDialog(viewModel = viewModel)
-    }
-
-    if (viewModel.openIntentForDirectory) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            uriLauncher.launch(viewModel.selectedDevice?.createOpenDocumentTreeIntent())
-        } else {
-            @Suppress("DEPRECATION")
-            uriLauncher.launch(viewModel.selectedDevice?.createAccessIntent(null))
-        }
-        viewModel.openIntentForDirectory = false
-    }
-
-    LaunchedEffect(context) {
-        val externalUri = SharedPrefsHelpers.instance?.getString("external_uri", null)
-        if (externalUri.isNullOrEmpty() || !context.areUriPermissionsGranted(externalUri)) {
-            viewModel.getExternalStorages(context)
-        } else {
-            mainViewModel.externalSyncUri = Uri.parse(externalUri)
-        }
     }
 }
 
