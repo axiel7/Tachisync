@@ -81,11 +81,15 @@ fun FilesView(
             contentPadding = contentPadding
         ) {
             itemsIndexed(
-                filesViewModel.downloadedManga,
-                key = { _, manga -> manga.file.uri }) { index, manga ->
-                SelectableMangaItemView(manga = manga, onClick = { selected ->
-                    filesViewModel.onSelectedManga(index, selected)
-                })
+                items = filesViewModel.downloadedManga,
+                key = { _, manga -> manga.file.uri }
+            ) { index, manga ->
+                SelectableMangaItemView(
+                    manga = manga,
+                    onClick = { selected ->
+                        filesViewModel.onSelectedManga(index, selected)
+                    }
+                )
             }
         }
 

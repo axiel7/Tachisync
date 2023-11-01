@@ -37,7 +37,7 @@ class MainViewModel : BaseViewModel() {
     }
 
     var isSyncing by mutableStateOf(false)
-    var progress = mutableFloatStateOf(0f)
+    val progress = mutableFloatStateOf(0f)
     private var currentFileCount = mutableIntStateOf(0)
 
     fun syncContents(context: Context, contents: List<Manga>, selected: List<Int>) {

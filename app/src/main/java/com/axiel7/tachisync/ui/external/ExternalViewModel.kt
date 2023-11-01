@@ -6,6 +6,7 @@ import android.os.Environment
 import android.os.storage.StorageManager
 import android.os.storage.StorageVolume
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
@@ -19,14 +20,17 @@ import kotlinx.coroutines.launch
 
 class ExternalViewModel : BaseViewModel() {
 
-    var externalStorages by mutableStateOf(listOf<StorageVolume>())
+    val externalStorages = mutableStateListOf<StorageVolume>()
 
     fun getExternalStorages(context: Context) {
         isLoading = true
         viewModelScope.launch(Dispatchers.IO) {
             val storageManager = context.getSystemService(Context.STORAGE_SERVICE) as StorageManager
-            externalStorages =
-                storageManager.storageVolumes.filter { it.isRemovable && it.state == Environment.MEDIA_MOUNTED }
+            externalStorages.clear()
+            externalStorages.addAll(
+                storageManager.storageVolumes
+                    .filter { it.isRemovable && it.state == Environment.MEDIA_MOUNTED }
+            )
             isLoading = false
         }
     }
@@ -42,7 +46,7 @@ class ExternalViewModel : BaseViewModel() {
                 App.applicationContext.releaseUriPermissions(Uri.parse(uri))
                 PreferencesRepository.remove(EXTERNAL_URI_KEY)
             }
-            externalStorages = emptyList()
+            externalStorages.clear()
             selectedDevice = null
         }
     }

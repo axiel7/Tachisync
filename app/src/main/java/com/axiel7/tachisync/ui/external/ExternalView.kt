@@ -169,10 +169,12 @@ fun ExternalDirectoryHelpDialog(viewModel: ExternalViewModel) {
         title = { Text(text = stringResource(R.string.external_directory)) },
         text = { Text(text = stringResource(R.string.external_directory_explanation)) },
         confirmButton = {
-            TextButton(onClick = {
-                viewModel.openExternalDirectoryHelpDialog = false
-                viewModel.openIntentForDirectory = true
-            }) {
+            TextButton(
+                onClick = {
+                    viewModel.openExternalDirectoryHelpDialog = false
+                    viewModel.openIntentForDirectory = true
+                }
+            ) {
                 Text(text = stringResource(android.R.string.ok))
             }
         }

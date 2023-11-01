@@ -21,7 +21,7 @@ import kotlinx.coroutines.launch
 
 class FilesViewModel : BaseViewModel() {
 
-    var downloadedManga = mutableStateListOf<Manga>()
+    val downloadedManga = mutableStateListOf<Manga>()
 
     var selectedManga = mutableListOf<Int>()
     var selectedCount by mutableIntStateOf(0)

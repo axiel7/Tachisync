@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
@@ -50,7 +51,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.view.WindowCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -70,13 +70,12 @@ import com.axiel7.tachisync.ui.theme.TachisyncTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
             TachisyncTheme {
                 Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    modifier = Modifier.fillMaxSize()
                 ) {
                     MainView()
                 }
@@ -161,9 +160,8 @@ fun MainView() {
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = if (showEditToolbar) MaterialTheme.colorScheme.surfaceColorAtElevation(
-                            3.dp
-                        )
+                        containerColor = if (showEditToolbar)
+                            MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp)
                         else MaterialTheme.colorScheme.background
                     )
                 )
