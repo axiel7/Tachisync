@@ -2,11 +2,7 @@ package com.axiel7.tachisync.ui.main
 
 import android.content.Context
 import android.net.Uri
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.viewModelScope
 import com.axiel7.tachisync.App
@@ -17,42 +13,44 @@ import com.axiel7.tachisync.data.model.Manga
 import com.axiel7.tachisync.ui.base.BaseViewModel
 import com.axiel7.tachisync.utils.FileUtils.syncDirectory
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class MainViewModel : BaseViewModel() {
+class MainViewModel : BaseViewModel<MainUiState>(), MainEvent {
 
-    val externalSyncUri = App.dataStore.data
-        .map { it[EXTERNAL_URI_KEY]?.let { uri -> Uri.parse(uri) } }
-        .stateIn(viewModelScope, SharingStarted.Lazily, null)
+    override val mutableUiState = MutableStateFlow(MainUiState())
 
-    fun onExternalUriChanged(value: String) = viewModelScope.launch {
-        PreferencesRepository.set(EXTERNAL_URI_KEY, value)
+    override fun onExternalUriChanged(value: String) {
+        viewModelScope.launch {
+            PreferencesRepository.set(EXTERNAL_URI_KEY, value)
+        }
     }
 
-    fun onTachiyomiUriChanged(value: String) = viewModelScope.launch {
-        PreferencesRepository.set(TACHIYOMI_URI_KEY, value)
+    override fun onTachiyomiUriChanged(value: String) {
+        viewModelScope.launch {
+            PreferencesRepository.set(TACHIYOMI_URI_KEY, value)
+        }
     }
 
-    var isSyncing by mutableStateOf(false)
-    val progress = mutableFloatStateOf(0f)
-    private var currentFileCount = mutableIntStateOf(0)
-
-    fun syncContents(context: Context, contents: List<Manga>, selected: List<Int>) {
-        isSyncing = true
+    override fun syncContents(context: Context, contents: List<Manga>, selected: List<Int>) {
         viewModelScope.launch(Dispatchers.IO) {
-            progress.floatValue = 0f
-            val externalUri = externalSyncUri.value
-            if (selected.isEmpty()) setErrorMessage("No content selected")
-            else if (externalUri == null) setErrorMessage("No external directory selected")
-            else {
+            val externalUri = uiState.value.externalSyncUri
+            if (selected.isEmpty()) {
+                showMessage("No content selected")
+            } else if (externalUri == null) {
+                showMessage("No external directory selected")
+            } else {
+                mutableUiState.update { it.copy(isLoading = true, syncProgress = 0f) }
                 try {
                     val destDir = DocumentFile.fromTreeUri(context, externalUri)
-                    if (destDir?.isDirectory == false) {
-                        setErrorMessage("Invalid external directory")
+                    if (destDir == null || !destDir.isDirectory) {
+                        showMessage("Invalid external directory")
                     } else {
+                        val currentFileCount = mutableIntStateOf(0)
                         val selectedContent =
                             contents.filterIndexed { index, _ -> selected.contains(index) }
                         val files = selectedContent.map { it.file }
@@ -60,21 +58,35 @@ class MainViewModel : BaseViewModel() {
                         files.forEach { file ->
                             context.syncDirectory(
                                 sourceDir = file,
-                                destRootDir = destDir!!,
-                                progress = progress,
+                                destRootDir = destDir,
+                                progress = uiState.value.syncProgress,
+                                updateProgress = this@MainViewModel::updateProgress,
                                 currentFileCount = currentFileCount,
                                 total = total
                             )
                         }
                     }
                 } catch (e: Exception) {
-                    setErrorMessage(e.message ?: "Error syncing")
-                    isSyncing = false
+                    mutableUiState.update {
+                        it.copy(isLoading = false, message = e.message ?: "Error syncing")
+                    }
                     return@launch
                 }
-                setErrorMessage("Sync completed")
+                mutableUiState.update { it.copy(isLoading = false, message = "Sync completed") }
             }
-            isSyncing = false
         }
+    }
+
+    private fun updateProgress(value: Float) {
+        mutableUiState.update { it.copy(syncProgress = value) }
+    }
+
+    init {
+        App.dataStore.data
+            .map { it[EXTERNAL_URI_KEY]?.let { uri -> Uri.parse(uri) } }
+            .onEach { value ->
+                mutableUiState.update { it.copy(externalSyncUri = value) }
+            }
+            .launchIn(viewModelScope)
     }
 }

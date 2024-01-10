@@ -6,7 +6,6 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableFloatState
 import androidx.compose.runtime.MutableIntState
 import androidx.documentfile.provider.DocumentFile
 import com.axiel7.tachisync.App
@@ -46,7 +45,8 @@ object FileUtils {
     fun Context.syncDirectory(
         sourceDir: DocumentFile,
         destRootDir: DocumentFile,
-        progress: MutableFloatState,
+        progress: Float,
+        updateProgress: (Float) -> Unit,
         currentFileCount: MutableIntState,
         total: Float,
     ) {
@@ -71,6 +71,7 @@ object FileUtils {
                                 sourceDir = childSourceDir,
                                 destRootDir = childDestDir,
                                 progress = progress,
+                                updateProgress = updateProgress,
                                 currentFileCount = currentFileCount,
                                 total = total
                             )
@@ -89,7 +90,7 @@ object FileUtils {
                             inputStream?.close()
                             outputStream?.close()
                         }
-                        progress.floatValue = currentFileCount.intValue.div(total)
+                        updateProgress(currentFileCount.intValue.div(total))
                     }
                 }
             }

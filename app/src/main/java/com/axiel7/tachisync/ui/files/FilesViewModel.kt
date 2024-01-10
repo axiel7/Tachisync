@@ -2,11 +2,6 @@ package com.axiel7.tachisync.ui.files
 
 import android.content.Context
 import android.net.Uri
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.viewModelScope
 import com.axiel7.tachisync.App
@@ -16,64 +11,66 @@ import com.axiel7.tachisync.data.model.Manga
 import com.axiel7.tachisync.ui.base.BaseViewModel
 import com.axiel7.tachisync.utils.FileUtils.areUriPermissionsGranted
 import com.axiel7.tachisync.utils.FileUtils.releaseUriPermissions
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class FilesViewModel : BaseViewModel() {
+class FilesViewModel : BaseViewModel<FilesUiState>(), FilesEvent {
 
-    val downloadedManga = mutableStateListOf<Manga>()
+    override val mutableUiState = MutableStateFlow(FilesUiState())
 
-    var selectedManga = mutableListOf<Int>()
-    var selectedCount by mutableIntStateOf(0)
+    override fun onSelectedManga(index: Int, selected: Boolean) {
+        mutableUiState.update {
+            it.downloadedManga[index] = it.downloadedManga[index].copy(isSelected = selected)
 
-    fun onSelectedManga(index: Int, selected: Boolean) {
-        downloadedManga[index] = downloadedManga[index].copy(isSelected = selected)
-        if (selected) {
-            selectedManga.add(index)
-        } else {
-            selectedManga.remove(index)
+            val selectedIndices = if (selected) it.selectedMangaIndices.plus(index)
+            else it.selectedMangaIndices.minus(index)
+            it.copy(
+                selectedMangaIndices = selectedIndices.toImmutableList()
+            )
         }
-        selectedCount = selectedManga.size
     }
 
-    fun selectAllManga() {
+    override fun selectAllManga() {
         viewModelScope.launch(Dispatchers.IO) {
-            selectedManga.clear()
-            for (index in downloadedManga.indices) {
-                downloadedManga[index] = downloadedManga[index].copy(isSelected = true)
-                selectedManga.add(index)
+            mutableUiState.update {
+                for (index in it.downloadedManga.indices) {
+                    it.downloadedManga[index] = it.downloadedManga[index].copy(isSelected = true)
+                }
+                it.copy(selectedMangaIndices = it.downloadedManga.indices.toImmutableList())
             }
-            selectedCount = downloadedManga.size
         }
     }
 
-    fun deselectAllManga() {
+    override fun deselectAllManga() {
         viewModelScope.launch(Dispatchers.IO) {
-            for (index in downloadedManga.indices) {
-                downloadedManga[index] = downloadedManga[index].copy(isSelected = false)
+            mutableUiState.update {
+                for (index in it.downloadedManga.indices) {
+                    it.downloadedManga[index] = it.downloadedManga[index].copy(isSelected = false)
+                }
+                it.copy(selectedMangaIndices = persistentListOf())
             }
-            selectedManga.clear()
-            selectedCount = 0
         }
     }
 
-    var openIntentForDirectory by mutableStateOf(false)
-
-    fun refresh(context: Context) {
+    override fun refresh(context: Context) {
         viewModelScope.launch(Dispatchers.IO) {
             deselectAllManga()
             val tachiyomiUri = PreferencesRepository.get(TACHIYOMI_URI_KEY)
             if (tachiyomiUri.isNullOrEmpty() || !context.areUriPermissionsGranted(tachiyomiUri)) {
-                openTachiyomiDirectoryHelpDialog = true
+                setOpenIntentForDirectory(true)
             } else {
                 readDownloadsDir(Uri.parse(tachiyomiUri), context)
             }
         }
     }
 
-    fun readDownloadsDir(downloadsUri: Uri, context: Context) {
-        isLoading = true
+    override fun readDownloadsDir(downloadsUri: Uri, context: Context) {
         viewModelScope.launch(Dispatchers.IO) {
+            setLoading(true)
             val tempContent = mutableListOf<Manga>()
             val sourcesDir = DocumentFile.fromTreeUri(context, downloadsUri)
             if (sourcesDir == null || !sourcesDir.exists()) {
@@ -93,13 +90,21 @@ class FilesViewModel : BaseViewModel() {
                             )
                     }
                 }
-                downloadedManga.clear()
-                downloadedManga.addAll(tempContent)
+                mutableUiState.value.run {
+                    downloadedManga.clear()
+                    downloadedManga.addAll(tempContent)
+                }
             }
 
-            isLoading = false
+            setLoading(false)
         }
     }
 
-    var openTachiyomiDirectoryHelpDialog by mutableStateOf(false)
+    override fun setOpenIntentForDirectory(value: Boolean) {
+        mutableUiState.update { it.copy(openIntentForDirectory = value) }
+    }
+
+    override fun setOpenTachiyomiDirectoryHelpDialog(value: Boolean) {
+        mutableUiState.update { it.copy(openTachiyomiDirectoryHelpDialog = value) }
+    }
 }

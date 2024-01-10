@@ -12,12 +12,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -32,10 +31,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.axiel7.tachisync.R
 import com.axiel7.tachisync.data.model.Manga
-import com.axiel7.tachisync.ui.main.MainViewModel
+import com.axiel7.tachisync.ui.composables.MessageDialog
+import com.axiel7.tachisync.ui.main.MainEvent
 import com.axiel7.tachisync.ui.theme.TachisyncTheme
 import com.axiel7.tachisync.utils.FileUtils.rememberUriLauncher
 
@@ -43,34 +42,43 @@ const val FILES_DESTINATION = "files"
 
 @Composable
 fun FilesView(
-    filesViewModel: FilesViewModel,
-    mainViewModel: MainViewModel,
-    contentPadding: PaddingValues = PaddingValues(),
+    filesUiState: FilesUiState,
+    filesEvent: FilesEvent?,
+    mainEvent: MainEvent?,
+    contentPadding: PaddingValues,
 ) {
     val context = LocalContext.current
     val uriLauncher = rememberUriLauncher { uri ->
-        mainViewModel.onTachiyomiUriChanged(uri.toString())
-        filesViewModel.readDownloadsDir(uri, context)
+        mainEvent?.onTachiyomiUriChanged(uri.toString())
+        filesEvent?.readDownloadsDir(uri, context)
     }
 
-    if (filesViewModel.openIntentForDirectory) {
+    if (filesUiState.openIntentForDirectory) {
         Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
             uriLauncher.launch(this)
         }
-        filesViewModel.openIntentForDirectory = false
+        filesEvent?.setOpenIntentForDirectory(false)
     }
 
-    if (filesViewModel.openTachiyomiDirectoryHelpDialog) {
-        TachiyomiDirectoryHelpDialog(viewModel = filesViewModel)
+    if (filesUiState.openTachiyomiDirectoryHelpDialog) {
+        MessageDialog(
+            title = stringResource(R.string.download_directory),
+            message = stringResource(R.string.downloads_directory_explanation),
+            onConfirm = {
+                filesEvent?.setOpenTachiyomiDirectoryHelpDialog(false)
+                filesEvent?.setOpenIntentForDirectory(true)
+            },
+            onDismiss = { filesEvent?.setOpenTachiyomiDirectoryHelpDialog(false) }
+        )
     }
 
-    if (filesViewModel.showMessage) {
-        Toast.makeText(context, filesViewModel.message, Toast.LENGTH_SHORT).show()
-        filesViewModel.showMessage = false
+    if (filesUiState.message != null) {
+        Toast.makeText(context, filesUiState.message, Toast.LENGTH_SHORT).show()
+        filesEvent?.onMessageDisplayed()
     }
 
     LaunchedEffect(context) {
-        if (filesViewModel.downloadedManga.isEmpty()) filesViewModel.refresh(context)
+        if (filesUiState.downloadedManga.isEmpty()) filesEvent?.refresh(context)
     }
 
     Box(
@@ -81,19 +89,19 @@ fun FilesView(
             contentPadding = contentPadding
         ) {
             itemsIndexed(
-                items = filesViewModel.downloadedManga,
+                items = filesUiState.downloadedManga,
                 key = { _, manga -> manga.file.uri }
             ) { index, manga ->
                 SelectableMangaItemView(
                     manga = manga,
                     onClick = { selected ->
-                        filesViewModel.onSelectedManga(index, selected)
+                        filesEvent?.onSelectedManga(index, selected)
                     }
                 )
             }
         }
 
-        if (filesViewModel.isLoading) {
+        if (filesUiState.isLoading) {
             CircularProgressIndicator(
                 modifier = Modifier.align(Alignment.Center)
             )
@@ -140,29 +148,17 @@ fun SelectableMangaItemView(
     }
 }
 
-@Composable
-fun TachiyomiDirectoryHelpDialog(viewModel: FilesViewModel) {
-    AlertDialog(
-        onDismissRequest = { viewModel.openTachiyomiDirectoryHelpDialog = false },
-        title = { Text(text = stringResource(R.string.download_directory)) },
-        text = { Text(text = stringResource(R.string.downloads_directory_explanation)) },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    viewModel.openTachiyomiDirectoryHelpDialog = false
-                    viewModel.openIntentForDirectory = true
-                }
-            ) {
-                Text(text = stringResource(android.R.string.ok))
-            }
-        }
-    )
-}
-
 @Preview(showBackground = true)
 @Composable
 fun FilesPreview() {
     TachisyncTheme {
-        FilesView(filesViewModel = viewModel(), mainViewModel = viewModel())
+        Surface {
+            FilesView(
+                filesUiState = FilesUiState(),
+                filesEvent = null,
+                mainEvent = null,
+                contentPadding = PaddingValues()
+            )
+        }
     }
 }
