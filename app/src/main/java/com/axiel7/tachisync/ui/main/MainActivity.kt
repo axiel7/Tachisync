@@ -1,7 +1,6 @@
 package com.axiel7.tachisync.ui.main
 
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -22,12 +21,15 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -88,6 +90,7 @@ fun MainView(
     val context = LocalContext.current
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val snackbarState = remember { SnackbarHostState() }
     val isFullScreenDestination by remember {
         derivedStateOf {
             navBackStackEntry?.destination?.route == ABOUT_DESTINATION
@@ -172,6 +175,9 @@ fun MainView(
                 BottomNavBar(navController = navController)
             }
         },
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarState)
+        },
         floatingActionButton = {
             AnimatedVisibility(
                 visible = !isFullScreenDestination,
@@ -211,9 +217,14 @@ fun MainView(
         )
     }
 
-    if (mainUiState.message != null) {
-        Toast.makeText(context, mainUiState.message, Toast.LENGTH_SHORT).show()
-        mainEvent?.onMessageDisplayed()
+    LaunchedEffect(mainUiState.message, filesUiState.message) {
+        if (mainUiState.message != null) {
+            snackbarState.showSnackbar(message = mainUiState.message)
+            mainEvent?.onMessageDisplayed()
+        } else if (filesUiState.message != null) {
+            snackbarState.showSnackbar(message = filesUiState.message)
+            filesEvent?.onMessageDisplayed()
+        }
     }
 
     if (mainUiState.isLoading) {
