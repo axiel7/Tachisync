@@ -8,7 +8,7 @@
     <string name="downloads">Downloads</string>
     <string name="external">External</string>
     <string name="download_directory">Downloads directory</string>
-    <string name="downloads_directory_explanation">On the next screen, navigate to the folder containing your Tachiyomi downloads (usually /Tachiyomi/downloads/) and select \'Use this folder\'</string>
+    <string name="downloads_directory_explanation">On the next screen, navigate to the folder containing your Tachiyomi/Mihon downloads (usually /Tachiyomi/downloads/) and select \'Use this folder\'</string>
     <string name="contents_synced_on">Contents will be synced on: %s</string>
     <string name="select_another_directory">Select another directory</string>
     <string name="no_external_found">No external devices found</string>

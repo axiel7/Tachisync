@@ -8,7 +8,7 @@
     <string name="downloads">Descargas</string>
     <string name="external">Externo</string>
     <string name="download_directory">Directorio de descargas</string>
-    <string name="downloads_directory_explanation">En la siguiente pantalla, dirígete a la carpeta contenedora de tus descargas de Tachiyomi (normalmente /Tachiyomi/downloads/) y pulsa \'Usar esta carpeta\'</string>
+    <string name="downloads_directory_explanation">En la siguiente pantalla, dirígete a la carpeta contenedora de tus descargas de Tachiyomi/Mihon (normalmente /Tachiyomi/downloads/) y pulsa \'Usar esta carpeta\'</string>
     <string name="contents_synced_on">Los contenidos serán sincronizados en: %s</string>
     <string name="select_another_directory">Seleccionar otro directorio</string>
     <string name="no_external_found">No se han encontrado dispositivos externos</string>
