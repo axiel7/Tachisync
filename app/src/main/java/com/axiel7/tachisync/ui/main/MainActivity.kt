@@ -44,13 +44,13 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.axiel7.tachisync.R
-import com.axiel7.tachisync.ui.about.ABOUT_DESTINATION
 import com.axiel7.tachisync.ui.files.FILES_DESTINATION
 import com.axiel7.tachisync.ui.files.FilesEvent
 import com.axiel7.tachisync.ui.files.FilesUiState
 import com.axiel7.tachisync.ui.files.FilesViewModel
 import com.axiel7.tachisync.ui.main.composables.BottomNavBar
 import com.axiel7.tachisync.ui.main.composables.SyncingDialog
+import com.axiel7.tachisync.ui.settings.SETTINGS_DESTINATION
 import com.axiel7.tachisync.ui.theme.TachisyncTheme
 
 class MainActivity : ComponentActivity() {
@@ -93,7 +93,7 @@ fun MainView(
     val snackbarState = remember { SnackbarHostState() }
     val isFullScreenDestination by remember {
         derivedStateOf {
-            navBackStackEntry?.destination?.route == ABOUT_DESTINATION
+            navBackStackEntry?.destination?.route == SETTINGS_DESTINATION
         }
     }
     val showEditToolbar by remember {
@@ -150,10 +150,10 @@ fun MainView(
                                     )
                                 }
                             }
-                            IconButton(onClick = { navController.navigate(ABOUT_DESTINATION) }) {
+                            IconButton(onClick = { navController.navigate(SETTINGS_DESTINATION) }) {
                                 Icon(
-                                    painter = painterResource(R.drawable.help_outline_24),
-                                    contentDescription = stringResource(R.string.about)
+                                    painter = painterResource(R.drawable.settings_24),
+                                    contentDescription = stringResource(R.string.settings)
                                 )
                             }
                         }

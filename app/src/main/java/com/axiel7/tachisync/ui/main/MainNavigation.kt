@@ -15,14 +15,14 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.axiel7.tachisync.ui.about.ABOUT_DESTINATION
-import com.axiel7.tachisync.ui.about.AboutView
 import com.axiel7.tachisync.ui.external.EXTERNAL_STORAGE_DESTINATION
 import com.axiel7.tachisync.ui.external.ExternalView
 import com.axiel7.tachisync.ui.files.FILES_DESTINATION
 import com.axiel7.tachisync.ui.files.FilesEvent
 import com.axiel7.tachisync.ui.files.FilesUiState
 import com.axiel7.tachisync.ui.files.FilesView
+import com.axiel7.tachisync.ui.settings.SETTINGS_DESTINATION
+import com.axiel7.tachisync.ui.settings.SettingsView
 
 @Composable
 fun MainNavigation(
@@ -74,8 +74,8 @@ fun MainNavigation(
             )
         }
 
-        composable(ABOUT_DESTINATION) {
-            AboutView(
+        composable(SETTINGS_DESTINATION) {
+            SettingsView(
                 navigateBack = {
                     navController.popBackStack()
                 }

@@ -17,7 +17,7 @@
     <string name="device">Dispositivo</string>
     <string name="external_directory">Directorio externo</string>
     <string name="external_directory_explanation">En la siguiente pantalla, dirígete a la carpeta donde quieras sincronizar tu contenido descargado y pulsa \'Usar esta carpeta\'</string>
-    <string name="about">Acerca de</string>
+    <string name="settings">Ajustes</string>
     <string name="back">Atrás</string>
     <string name="developer">Desarrollador</string>
     <string name="version">Versión</string>

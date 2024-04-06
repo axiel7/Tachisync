@@ -1,4 +1,4 @@
-package com.axiel7.tachisync.ui.about
+package com.axiel7.tachisync.ui.settings
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.clickable
@@ -30,18 +30,18 @@ import com.axiel7.tachisync.R
 import com.axiel7.tachisync.ui.theme.TachisyncTheme
 import com.axiel7.tachisync.utils.Extensions.openAction
 
-const val ABOUT_DESTINATION = "about"
+const val SETTINGS_DESTINATION = "settings"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AboutView(
+fun SettingsView(
     navigateBack: () -> Unit
 ) {
     val context = LocalContext.current
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = stringResource(R.string.about)) },
+                title = { Text(text = stringResource(R.string.settings)) },
                 navigationIcon = {
                     IconButton(onClick = navigateBack) {
                         Icon(
@@ -131,8 +131,8 @@ fun AboutItem(
 
 @Preview(showBackground = true)
 @Composable
-fun AboutPreview() {
+fun SettingsPreview() {
     TachisyncTheme {
-        AboutView(navigateBack = {})
+        SettingsView(navigateBack = {})
     }
 }

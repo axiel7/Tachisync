@@ -17,7 +17,7 @@
     <string name="device">Device</string>
     <string name="external_directory">External directory</string>
     <string name="external_directory_explanation">On the next screen, navigate to the folder you want to sync your downloaded content and select \'Use this folder\'</string>
-    <string name="about">About</string>
+    <string name="settings">Settings</string>
     <string name="back">Back</string>
     <string name="developer">Developer</string>
     <string name="version">Version</string>
