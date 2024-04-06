@@ -11,8 +11,6 @@ import com.axiel7.tachisync.data.model.Manga
 import com.axiel7.tachisync.ui.base.BaseViewModel
 import com.axiel7.tachisync.utils.FileUtils.areUriPermissionsGranted
 import com.axiel7.tachisync.utils.FileUtils.releaseUriPermissions
-import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -23,35 +21,33 @@ class FilesViewModel : BaseViewModel<FilesUiState>(), FilesEvent {
     override val mutableUiState = MutableStateFlow(FilesUiState())
 
     override fun onSelectedManga(index: Int, selected: Boolean) {
-        mutableUiState.update {
-            it.downloadedManga[index] = it.downloadedManga[index].copy(isSelected = selected)
+        mutableUiState.value.run {
+            downloadedManga[index] = downloadedManga[index].copy(isSelected = selected)
 
-            val selectedIndices = if (selected) it.selectedMangaIndices.plus(index)
-            else it.selectedMangaIndices.minus(index)
-            it.copy(
-                selectedMangaIndices = selectedIndices.toImmutableList()
-            )
+            if (selected) selectedMangaIndices.add(index)
+            else selectedMangaIndices.remove(index)
         }
     }
 
     override fun selectAllManga() {
         viewModelScope.launch(Dispatchers.IO) {
-            mutableUiState.update {
-                for (index in it.downloadedManga.indices) {
-                    it.downloadedManga[index] = it.downloadedManga[index].copy(isSelected = true)
+            mutableUiState.value.run {
+                for (index in downloadedManga.indices) {
+                    downloadedManga[index] = downloadedManga[index].copy(isSelected = true)
                 }
-                it.copy(selectedMangaIndices = it.downloadedManga.indices.toImmutableList())
+                selectedMangaIndices.clear()
+                selectedMangaIndices.addAll(downloadedManga.indices)
             }
         }
     }
 
     override fun deselectAllManga() {
         viewModelScope.launch(Dispatchers.IO) {
-            mutableUiState.update {
-                for (index in it.downloadedManga.indices) {
-                    it.downloadedManga[index] = it.downloadedManga[index].copy(isSelected = false)
+            mutableUiState.value.run {
+                for (index in downloadedManga.indices) {
+                    downloadedManga[index] = downloadedManga[index].copy(isSelected = false)
                 }
-                it.copy(selectedMangaIndices = persistentListOf())
+                selectedMangaIndices.clear()
             }
         }
     }

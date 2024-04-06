@@ -11,7 +11,7 @@ import kotlinx.collections.immutable.persistentListOf
 @Stable
 data class FilesUiState(
     val downloadedManga: SnapshotStateList<Manga> = mutableStateListOf(),
-    val selectedMangaIndices: ImmutableList<Int> = persistentListOf(),
+    val selectedMangaIndices: SnapshotStateList<Int> = mutableStateListOf(),
     val openIntentForDirectory: Boolean = false,
     val openTachiyomiDirectoryHelpDialog: Boolean = false,
     override val isLoading: Boolean = false,
