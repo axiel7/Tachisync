@@ -180,7 +180,7 @@ fun MainView(
         },
         floatingActionButton = {
             AnimatedVisibility(
-                visible = !isFullScreenDestination,
+                visible = !isFullScreenDestination && showEditToolbar,
                 enter = scaleIn(),
                 exit = scaleOut()
             ) {
