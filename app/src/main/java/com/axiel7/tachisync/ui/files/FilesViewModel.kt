@@ -61,7 +61,7 @@ class FilesViewModel : BaseViewModel<FilesUiState>(), FilesEvent {
             deselectAllManga()
             val tachiyomiUri = PreferencesRepository.get(TACHIYOMI_URI_KEY)
             if (tachiyomiUri.isNullOrEmpty() || !context.areUriPermissionsGranted(tachiyomiUri)) {
-                setOpenIntentForDirectory(true)
+                setOpenTachiyomiDirectoryHelpDialog(true)
             } else {
                 readDownloadsDir(Uri.parse(tachiyomiUri), context)
             }
