@@ -49,6 +49,7 @@ object FileUtils {
         updateProgress: (Float) -> Unit,
         currentFileCount: MutableIntState,
         total: Float,
+        shouldRemoveScanlator: Boolean,
     ) {
         if (sourceDir.isDirectory && destRootDir.isDirectory && sourceDir.name != null) {
             if (sourceDir.name!!.endsWith("_tmp")) return
@@ -73,7 +74,8 @@ object FileUtils {
                                 progress = progress,
                                 updateProgress = updateProgress,
                                 currentFileCount = currentFileCount,
-                                total = total
+                                total = total,
+                                shouldRemoveScanlator = shouldRemoveScanlator
                             )
                     } else {
                         currentFileCount.intValue += 1
@@ -82,6 +84,14 @@ object FileUtils {
                         var destFile = destDir?.findFile(file.name!!)
                         if (destFile == null && file.type != null) {
                             destFile = destDir?.createFile(file.type!!, file.name!!)
+                        }
+                        if (shouldRemoveScanlator) {
+                            val nameWithoutScanlator = destFile?.name
+                                ?.replaceBefore('_', "")
+                                ?.drop(1)
+                            if (nameWithoutScanlator != null) {
+                                destFile?.renameTo(nameWithoutScanlator)
+                            }
                         }
                         if (destFile?.uri != null) {
                             val inputStream = contentResolver.openInputStream(file.uri)

@@ -1,9 +1,12 @@
 package com.axiel7.tachisync.data.datastore
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import com.axiel7.tachisync.App
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
 
 object PreferencesRepository {
@@ -11,6 +14,12 @@ object PreferencesRepository {
     private val store get() = App.dataStore
 
     suspend fun <T> get(key: Preferences.Key<T>) = store.data.first()[key]
+
+    @Composable
+    fun <T> remember(
+        key: Preferences.Key<T>,
+        initial: T? = null
+    ) = store.data.map { it[key] }.collectAsState(initial)
 
     /**
      * Gets the value by blocking the main thread

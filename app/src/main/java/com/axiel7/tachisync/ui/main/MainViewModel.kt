@@ -7,6 +7,7 @@ import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.viewModelScope
 import com.axiel7.tachisync.App
 import com.axiel7.tachisync.data.datastore.PreferencesDataStore.EXTERNAL_URI_KEY
+import com.axiel7.tachisync.data.datastore.PreferencesDataStore.REMOVE_SCANLATOR_KEY
 import com.axiel7.tachisync.data.datastore.PreferencesDataStore.TACHIYOMI_URI_KEY
 import com.axiel7.tachisync.data.datastore.PreferencesRepository
 import com.axiel7.tachisync.data.model.Manga
@@ -50,6 +51,7 @@ class MainViewModel : BaseViewModel<MainUiState>(), MainEvent {
                     if (destDir == null || !destDir.isDirectory) {
                         showMessage("Invalid external directory")
                     } else {
+                        val shouldRemoveScanlator = PreferencesRepository.get(REMOVE_SCANLATOR_KEY)
                         val currentFileCount = mutableIntStateOf(0)
                         val selectedContent =
                             contents.filterIndexed { index, _ -> selected.contains(index) }
@@ -62,7 +64,8 @@ class MainViewModel : BaseViewModel<MainUiState>(), MainEvent {
                                 progress = uiState.value.syncProgress,
                                 updateProgress = this@MainViewModel::updateProgress,
                                 currentFileCount = currentFileCount,
-                                total = total
+                                total = total,
+                                shouldRemoveScanlator = shouldRemoveScanlator == true
                             )
                         }
                     }
