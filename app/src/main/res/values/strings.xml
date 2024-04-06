@@ -21,4 +21,5 @@
     <string name="back">Back</string>
     <string name="developer">Developer</string>
     <string name="version">Version</string>
+    <string name="reset_downloads_directory">Reset downloads directory</string>
 </resources>

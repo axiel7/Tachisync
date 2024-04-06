@@ -35,6 +35,7 @@ const val SETTINGS_DESTINATION = "settings"
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsView(
+    resetDownloadsDirectory: () -> Unit,
     navigateBack: () -> Unit
 ) {
     val context = LocalContext.current
@@ -56,6 +57,11 @@ fun SettingsView(
         Column(
             modifier = Modifier.padding(it)
         ) {
+            AboutItem(
+                title = stringResource(R.string.reset_downloads_directory),
+                icon = R.drawable.sync_24,
+                onClick = resetDownloadsDirectory
+            )
             AboutItem(
                 title = "GitHub",
                 subtitle = "Source code",
@@ -133,6 +139,9 @@ fun AboutItem(
 @Composable
 fun SettingsPreview() {
     TachisyncTheme {
-        SettingsView(navigateBack = {})
+        SettingsView(
+            resetDownloadsDirectory = {},
+            navigateBack = {}
+        )
     }
 }

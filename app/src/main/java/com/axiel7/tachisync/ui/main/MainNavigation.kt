@@ -76,6 +76,9 @@ fun MainNavigation(
 
         composable(SETTINGS_DESTINATION) {
             SettingsView(
+                resetDownloadsDirectory = {
+                    mainEvent?.onTachiyomiUriChanged("")
+                },
                 navigateBack = {
                     navController.popBackStack()
                 }
