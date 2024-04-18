@@ -12,6 +12,8 @@ import com.axiel7.tachisync.App
 
 object FileUtils {
 
+    private val chapterRegex = Regex("(#\\d*)")
+
     @Composable
     fun rememberUriLauncher(onUriReceived: (Uri) -> Unit) = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -62,7 +64,7 @@ object FileUtils {
 
             // Copy each file or directory to the destination directory
             sourceDir.listFiles().forEach { file ->
-                if (file.name != null) {
+                file.name?.let { filename ->
                     if (file.isDirectory) {
                         // If the file is a directory, recursively call this function
                         val childSourceDir = sourceDir.findFile(file.name!!)
@@ -81,17 +83,23 @@ object FileUtils {
                         currentFileCount.intValue += 1
                         // If the file is a regular file, copy its contents to the destination file
                         // Check if the file already exist
-                        var destFile = destDir?.findFile(file.name!!)
+                        var destFile = destDir?.findFile(filename)
                         if (destFile == null && file.type != null) {
                             destFile = destDir?.createFile(file.type!!, file.name!!)
                         }
-                        if (shouldRemoveScanlator) {
-                            val nameWithoutScanlator = destFile?.name
-                                ?.replaceBefore('_', "")
-                                ?.drop(1)
-                            if (nameWithoutScanlator != null) {
-                                destFile?.renameTo(nameWithoutScanlator)
+                        if (shouldRemoveScanlator && filename.contains('_')) {
+                            val chapterNumber = chapterRegex.find(filename)?.value
+                            val nameWithoutScanlator = filename
+                                .replaceBefore('_', "")
+                                .drop(1)
+                            val finalName = if (chapterNumber != null
+                                && !nameWithoutScanlator.contains(chapterNumber)
+                            ) {
+                                "$chapterNumber $nameWithoutScanlator"
+                            } else {
+                                nameWithoutScanlator
                             }
+                            destFile?.renameTo(finalName)
                         }
                         if (destFile?.uri != null) {
                             val inputStream = contentResolver.openInputStream(file.uri)
