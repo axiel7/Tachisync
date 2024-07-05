@@ -88,12 +88,13 @@ private fun ExternalContent(
         )
     }
 
-    if (externalUiState.openIntentForDirectory) {
+    if (externalUiState.openIntentForDirectory && externalUiState.selectedDevice != null) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            uriLauncher.launch(externalUiState.selectedDevice?.createOpenDocumentTreeIntent())
+            uriLauncher.launch(externalUiState.selectedDevice.createOpenDocumentTreeIntent())
         } else {
             @Suppress("DEPRECATION")
-            uriLauncher.launch(externalUiState.selectedDevice?.createAccessIntent(null))
+            externalUiState.selectedDevice.createAccessIntent(null)
+                ?.let { uriLauncher.launch(it) }
         }
         externalEvent?.setOpenIntentForDirectory(false)
     }
