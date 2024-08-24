@@ -17,7 +17,7 @@ android {
         setProperty("archivesBaseName", "tachisync-$versionName")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        resourceConfigurations.addAll(arrayOf("en"))
+        resourceConfigurations.addAll(arrayOf("en", "es"))
         vectorDrawables {
             useSupportLibrary = true
         }
