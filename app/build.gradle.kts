@@ -6,12 +6,12 @@ plugins {
 
 android {
     namespace = "com.axiel7.tachisync"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.axiel7.tachisync"
         minSdk = 24
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 10
         versionName = "1.0.9"
         setProperty("archivesBaseName", "tachisync-$versionName")
