@@ -105,6 +105,11 @@ fun FilesView(
             CircularProgressIndicator(
                 modifier = Modifier.align(Alignment.Center)
             )
+        } else if (filesUiState.downloadedManga.isEmpty()) {
+            Text(
+                text = stringResource(R.string.no_downloaded_content),
+                modifier = Modifier.align(Alignment.Center)
+            )
         }
     }
 }

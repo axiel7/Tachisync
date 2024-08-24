@@ -22,4 +22,5 @@
     <string name="developer">Desarrollador</string>
     <string name="version">Versión</string>
     <string name="reset_downloads_directory">Resetear directorio de descargas</string>
+    <string name="no_downloaded_content">Sin contenido descargado</string>
 </resources>
